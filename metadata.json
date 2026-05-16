@@ -1,0 +1,8 @@
+{
+  "name": "Olakunle and Partners IMS",
+  "description": "Recompiled from GitHub repository DeCodeEater/olakunle-and-partners-ims-aistudios",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
