@@ -176,7 +176,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             Olakunle & Partners
           </h1>
           <p className="font-mono text-[10px] text-muted-steel mt-1 uppercase tracking-widest">
-            Operational Command
+            Internal Management system
           </p>
         </div>
         

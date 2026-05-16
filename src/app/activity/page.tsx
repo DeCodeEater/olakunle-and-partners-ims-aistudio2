@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { Search, Plus, Filter, MoreHorizontal, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, AlertCircle, Receipt, Building2, UserCircle2, Landmark, Wallet, AlertTriangle, X } from 'lucide-react';
+import { Search, Plus, Filter, MoreHorizontal, ArrowUpRight, ArrowDownRight, Clock, CheckCircle2, AlertCircle, Receipt, Building2, UserCircle2, Landmark, Wallet, AlertTriangle, X, ArrowUpDown, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Mock Data for Metrics
@@ -15,415 +15,271 @@ const metrics = [
   { label: 'Commission Payouts', value: '₦42M', trend: '+4%', positive: true, desc: 'Disbursed commissions' },
 ];
 
-const feedEvents = [
-  { id: '1', type: 'payment_received', title: 'Rent Payment Received', desc: '₦4.5M from Chukwudi Eze for Azure Heights Unit A4', time: '10 mins ago', user: 'System (Auto)', icon: Receipt, iconColor: 'text-emerald-trust', iconBg: 'bg-emerald-trust/10' },
-  { id: '2', type: 'property_sold', title: 'Property Sold', desc: 'Lekki Waterfront Villa sold for ₦450M to Alhaji Musa', time: '2 hours ago', user: 'Elena R.', icon: Landmark, iconColor: 'text-deep-slate', iconBg: 'bg-surface-dim' },
-  { id: '3', type: 'document_uploaded', title: 'Document Uploaded', desc: 'Deed of Assignment uploaded for Coral City', time: '4 hours ago', user: 'Legal Dept', icon: FileTextIcon, iconColor: 'text-muted-steel', iconBg: 'bg-surface-container-high' },
-  { id: '4', type: 'expense_logged', title: 'Expense Added', desc: '₦850k for HVAC Maintenance at Victoria Plaza', time: '5 hours ago', user: 'Facility Mgt', icon: Wallet, iconColor: 'text-amber-600', iconBg: 'bg-amber-500/10' },
-  { id: '5', type: 'lease_renewed', title: 'Lease Renewed', desc: 'TechNova renewed lease for Ikoyi Foreshore (5 Yrs)', time: '1 day ago', user: 'Mgt Team', icon: Building2, iconColor: 'text-emerald-trust', iconBg: 'bg-emerald-trust/10' },
+const unifiedData = [
+  { id: '1', txId: 'PAY-8842', type: 'Rent Payment', entity: 'Chukwudi Eze', property: 'Azure Heights Unit A4', amount: '₦4.5M', status: 'Completed', date: 'Oct 24, 2023', kind: 'payment', icon: Receipt },
+  { id: '2', txId: 'SAL-102', type: 'Property Sale', entity: 'Alhaji Musa', property: 'Lekki Waterfront Villa', amount: '₦450M', status: 'Completed', date: 'Oct 23, 2023', kind: 'sale', icon: Landmark },
+  { id: '3', txId: 'PAY-8843', type: 'Service Charge', entity: 'Acme Corp', property: 'Victoria Plaza', amount: '₦1.2M', status: 'Pending', date: 'Oct 15, 2023', kind: 'payment', icon: Wallet },
+  { id: '4', txId: 'EVT-091', type: 'Lease Renewal', entity: 'TechNova', property: 'Ikoyi Foreshore', amount: '-', status: 'Signed', date: 'Oct 10, 2023', kind: 'event', icon: Building2 },
+  { id: '5', txId: 'EVT-092', type: 'Document Upload', entity: 'Legal Dept', property: 'Coral City', amount: '-', status: 'Verified', date: 'Oct 08, 2023', kind: 'event', icon: FileText },
+  { id: '6', txId: 'PAY-8844', type: 'Maintenance Exp.', entity: 'Facility Mgt', property: 'Victoria Plaza', amount: '₦850k', status: 'Completed', date: 'Oct 05, 2023', kind: 'expense', icon: Wallet },
 ];
-
-const paymentsData = [
-  { id: 'PAY-8842', type: 'Rent Payment', payer: 'Chukwudi Eze', property: 'Azure Heights Unit A4', amount: '₦4.5M', status: 'Paid', method: 'Bank Transfer', date: 'Oct 24, 2023' },
-  { id: 'PAY-8843', type: 'Installment', payer: 'Zenith Construction', property: 'Banana Island', amount: '₦15M', status: 'Pending', method: 'Wire Transfer', date: 'Oct 23, 2023' },
-  { id: 'PAY-8844', type: 'Service Charge', payer: 'Acme Corp', property: 'Victoria Plaza', amount: '₦1.2M', status: 'Overdue', method: 'Card', date: 'Oct 15, 2023' },
-  { id: 'PAY-8845', type: 'Deposit', payer: 'Sarah James', property: 'The Meridian B2', amount: '₦800k', status: 'Paid', method: 'Bank Transfer', date: 'Oct 14, 2023' },
-];
-
-const salesData = [
-  { id: 'SAL-102', property: 'Lekki Waterfront Villa', buyer: 'Alhaji Musa', facilitator: 'Michael O.', amount: '₦450M', progress: '100%', titleStatus: 'Transferred', agreement: 'Signed', date: 'Oct 25, 2023' },
-  { id: 'SAL-103', property: 'Sapphire Towers U12', buyer: 'TechNova', facilitator: 'Angela B.', amount: '₦450M', progress: '40%', titleStatus: 'Pending', agreement: 'Drafting', date: 'Oct 20, 2023' },
-];
-
-function FileTextIcon(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
-      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
-      <path d="M10 9H8" />
-      <path d="M16 13H8" />
-      <path d="M16 17H8" />
-    </svg>
-  );
-}
 
 export default function ActivityPage() {
-  const [activeTab, setActiveTab] = useState<'Feed' | 'Payments' | 'Sales' | 'Rentals' | 'Expenses' | 'Commissions'>('Feed');
   const [selectedTx, setSelectedTx] = useState<any | null>(null);
+  const [viewMode, setViewMode] = useState<'activities' | 'transactions'>('activities');
 
   const getStatusColor = (status: string) => {
     switch(status.toLowerCase()) {
-      case 'paid': case 'signed': case 'transferred': case 'approved':
+      case 'completed': case 'signed': case 'verified':
         return 'bg-emerald-trust/10 text-emerald-trust border-emerald-trust/20';
-      case 'pending': case 'drafting':
+      case 'pending':
         return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
-      case 'overdue': case 'failed': case 'disputed':
+      case 'failed':
         return 'bg-error/10 text-error border-error/20';
-      case 'refunded':
-        return 'bg-surface-container-high text-muted-steel border-whisper-border';
       default:
         return 'bg-surface-container-low text-muted-steel border-whisper-border';
     }
   };
 
+  const displayData = unifiedData.filter(item => 
+    viewMode === 'transactions' 
+      ? ['payment', 'sale', 'expense'].includes(item.kind)
+      : ['event'].includes(item.kind)
+  );
+
   return (
     <DashboardLayout>
-      <div className="max-w-[1440px] mx-auto p-4 md:p-6 lg:p-8 space-y-6 relative flex flex-col min-h-screen">
+      <div className="w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-10 space-y-6 md:space-y-10 relative flex flex-col min-h-screen">
         
-        {/* Header section */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-whisper-border pb-6">
-          <div className="max-w-xl">
-            <h1 className="font-headline text-3xl font-medium tracking-tight text-deep-slate uppercase">Activity & Transactions</h1>
-            <p className="font-body text-sm text-muted-steel mt-2 leading-relaxed">
-              Track operational activity, payments, sales, rentals, and business events across the entire portfolio.
-            </p>
+        <div className="space-y-6 md:space-y-10">
+          {/* Header section */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6">
+            <div className="max-w-2xl">
+              <h1 className="font-headline text-2xl md:text-3xl lg:text-4xl font-medium tracking-tight text-deep-slate">Activities & Transactions</h1>
+              <p className="font-body text-sm md:text-base text-muted-steel mt-1.5 md:mt-3 leading-relaxed">
+                Track all operational activity, payments, sales, and business events across the entire property portfolio.
+              </p>
+            </div>
+            <div className="w-full md:w-auto flex gap-2">
+              <div className="flex gap-2 md:hidden">
+                 <button className="flex-shrink-0 flex items-center justify-center w-11 h-11 bg-pure-surface rounded-lg border border-whisper-border shadow-sm text-muted-steel hover:text-deep-slate transition-colors">
+                   <Search className="w-5 h-5" />
+                 </button>
+                 <button className="flex-shrink-0 flex items-center justify-center w-11 h-11 bg-pure-surface rounded-lg border border-whisper-border shadow-sm text-muted-steel hover:text-deep-slate transition-colors">
+                   <ArrowUpDown className="w-5 h-5" />
+                 </button>
+                 <button className="flex-shrink-0 flex items-center justify-center w-11 h-11 bg-pure-surface rounded-lg border border-whisper-border shadow-sm text-muted-steel hover:text-deep-slate transition-colors">
+                   <Filter className="w-5 h-5" />
+                 </button>
+              </div>
+              <button className="flex-1 md:flex-none h-11 px-6 bg-deep-slate text-pure-surface font-medium text-[13px] rounded-lg flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors shadow-sm">
+                <Plus className="w-4 h-4" />
+                <span className="whitespace-nowrap">New Record</span>
+              </button>
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-steel w-4 h-4 pointer-events-none" />
+
+          {/* KPI Summary (Scrollable horizontally on mobile) */}
+          <div className="flex overflow-x-auto pb-4 -mx-4 px-4 md:pb-0 md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            <div className="flex md:grid md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-px md:bg-whisper-border md:border md:border-whisper-border md:rounded-2xl md:overflow-hidden md:shadow-sm w-full">
+              {metrics.map((metric, i) => (
+                <div key={i} className="bg-pure-surface p-4 md:p-5 flex flex-col justify-between group md:hover:bg-surface-container-lowest transition-colors min-w-[180px] md:min-w-0 rounded-xl md:rounded-none border border-whisper-border md:border-none shadow-sm md:shadow-none flex-shrink-0">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2 md:mb-3">
+                      <span className={`flex items-center px-1.5 py-0.5 rounded text-[10px] md:text-[11px] font-mono font-bold uppercase tracking-widest ${metric.positive ? 'text-emerald-trust bg-emerald-trust/10' : 'text-error bg-error/10'}`}>
+                        {metric.positive ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
+                        {metric.trend}
+                      </span>
+                    </div>
+                    <p className="font-mono text-[11px] md:text-xs uppercase tracking-widest font-semibold md:font-medium text-muted-steel mb-0.5">
+                      {metric.label}
+                    </p>
+                  </div>
+                  <div className="mt-1 md:mt-2">
+                    <p className="font-headline text-xl md:text-2xl font-medium text-deep-slate">
+                      {metric.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Search & Actions */}
+        <div className="flex flex-col gap-4 md:gap-6">
+          {/* View Toggle */}
+          <div className="bg-surface-container-low p-1 rounded-lg inline-flex overflow-x-auto border border-whisper-border w-max max-w-full hide-scrollbar">
+            {(['activities', 'transactions'] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => setViewMode(mode)}
+                className={`relative px-4 md:px-5 py-2 md:py-2.5 rounded-md font-mono text-[10px] md:text-[11px] uppercase tracking-widest font-bold transition-colors whitespace-nowrap capitalize ${
+                  viewMode === mode ? 'text-deep-slate' : 'text-muted-steel hover:text-deep-slate'
+                }`}
+              >
+                {viewMode === mode && (
+                  <motion.div
+                    layoutId="view-mode-tab-2"
+                    className="absolute inset-0 bg-pure-surface rounded-md shadow-sm border border-whisper-border"
+                    initial={false}
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+                <span className="relative z-10">{mode === 'activities' ? 'Activities' : 'Transactions'}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="hidden md:flex flex-col lg:flex-row items-center gap-3 md:gap-4 w-full">
+            <div className="relative flex-1 flex items-center h-14 bg-pure-surface rounded-xl border border-whisper-border shadow-sm w-full">
+              <Search className="absolute left-4 text-muted-steel/70 w-5 h-5 pointer-events-none" />
               <input 
-                className="w-full bg-pure-surface border border-whisper-border rounded h-10 pl-9 pr-4 font-body text-sm text-deep-slate focus:outline-none focus:border-deep-slate transition-all placeholder:text-muted-steel/60 shadow-sm" 
-                placeholder="Search specific transactions..." 
+                className="w-full bg-transparent border-none h-full pl-12 pr-4 font-body text-[15px] text-deep-slate focus:outline-none focus:ring-0 placeholder:text-muted-steel/60" 
+                placeholder={`Search across all ${viewMode}...`}
                 type="text"
               />
             </div>
-            <button className="h-10 px-4 bg-pure-surface border border-whisper-border text-deep-slate font-mono text-[11px] uppercase font-bold tracking-widest rounded flex items-center justify-center gap-2 hover:bg-surface-container-low transition-colors shadow-sm flex-shrink-0">
-              <Wallet className="w-4 h-4" />
-              <span className="hidden sm:inline">Add Expense</span>
-            </button>
-            <button className="h-10 px-6 bg-deep-slate text-pure-surface font-mono text-[11px] uppercase font-bold tracking-widest rounded flex items-center justify-center gap-2 hover:bg-slate-800 transition-colors shadow-sm flex-shrink-0">
-              <Plus className="w-4 h-4" />
-              <span>New Transaction</span>
-            </button>
-          </div>
-        </div>
-
-        {/* KPI Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          {metrics.map((metric, i) => (
-            <div key={i} className="p-4 rounded-lg border border-whisper-border bg-pure-surface flex flex-col justify-between hover:border-slate-300 transition-colors">
-              <p className="font-mono text-[10px] uppercase tracking-widest font-medium text-muted-steel mb-2">
-                {metric.label}
-              </p>
-              <div>
-                <div className="flex items-end gap-2 mb-1">
-                  <p className="font-mono text-xl lg:text-2xl font-bold text-deep-slate leading-none">
-                    {metric.value}
-                  </p>
-                  <span className={`flex items-center text-[10px] font-mono font-bold uppercase tracking-widest mb-0.5 ${metric.positive ? 'text-emerald-trust' : 'text-error'}`}>
-                    {metric.positive ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
-                    {metric.trend}
-                  </span>
-                </div>
-                <p className="text-[10px] text-muted-steel font-body">{metric.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Main Content Area */}
-        <div className="flex flex-col lg:flex-row gap-6 relative flex-grow min-h-[600px]">
-          
-          <div className={`flex-1 flex flex-col gap-4 transition-all duration-300 ${selectedTx ? 'lg:pr-[400px]' : ''}`}>
             
-            {/* Tabs */}
-            <div className="bg-surface-container-low p-1 rounded-lg inline-flex overflow-x-auto hide-scrollbar border border-whisper-border/50 max-w-full">
-              {(['Feed', 'Payments', 'Sales', 'Rentals', 'Expenses', 'Commissions'] as const).map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`relative px-5 py-2.5 rounded-md font-mono text-[11px] uppercase tracking-widest font-bold transition-colors whitespace-nowrap ${
-                    activeTab === tab ? 'text-deep-slate' : 'text-muted-steel hover:text-deep-slate'
-                  }`}
-                >
-                  {activeTab === tab && (
-                    <motion.div
-                      layoutId="activity-active-tab"
-                      className="absolute inset-0 bg-pure-surface rounded-md shadow-sm border border-whisper-border"
-                      initial={false}
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{tab}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* List/Table Container */}
-            <div className="bg-pure-surface border border-whisper-border rounded-lg overflow-hidden flex-1 shadow-sm flex flex-col">
-              <div className="flex justify-between items-center p-4 border-b border-whisper-border bg-surface-container-low/30">
-                <button className="px-3 py-1.5 border border-whisper-border rounded text-[10px] font-mono font-bold uppercase tracking-widest text-deep-slate bg-pure-surface hover:bg-surface-container-low transition-colors flex items-center gap-2">
-                  <Filter className="w-3 h-3" /> Filters
-                </button>
-                <div className="text-[10px] font-mono text-muted-steel tracking-widest uppercase font-medium">
-                  {activeTab === 'Feed' ? 'Live Stream' : 'Most Recent'}
-                </div>
-              </div>
-
-              <div className="overflow-x-auto overflow-y-auto flex-1">
-                {activeTab === 'Feed' ? (
-                  <div className="p-6">
-                    <div className="relative border-l border-whisper-border/50 ml-4 space-y-8 pb-4">
-                      {feedEvents.map((event, i) => {
-                        const Icon = event.icon;
-                        return (
-                          <div key={event.id} className="relative pl-8 group">
-                            <div className={`absolute -left-5 top-0 w-10 h-10 rounded-full border-4 border-pure-surface flex items-center justify-center ${event.iconBg} ${event.iconColor} group-hover:scale-110 transition-transform`}>
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div className="bg-pure-surface border border-whisper-border rounded p-4 shadow-sm hover:shadow-[0_4px_20px_-2px_rgba(0,0,0,0.05)] transition-all cursor-pointer">
-                              <div className="flex justify-between items-start mb-1">
-                                <h4 className="font-medium text-deep-slate">{event.title}</h4>
-                                <span className="text-[11px] text-muted-steel font-mono">{event.time}</span>
-                              </div>
-                              <p className="text-sm text-on-surface-variant mb-2">{event.desc}</p>
-                              <div className="flex items-center gap-2">
-                                <UserCircle2 className="w-3.5 h-3.5 text-muted-steel" />
-                                <span className="text-[11px] text-muted-steel">{event.user}</span>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ) : activeTab === 'Payments' ? (
-                  <table className="w-full text-left border-collapse min-w-[800px]">
-                    <thead className="bg-surface-container-low/50 sticky top-0 z-10">
-                      <tr>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Ref / Property</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Type / Payer</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Amount / Method</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Date</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="font-body text-sm align-top">
-                      {paymentsData.map((row) => (
-                        <tr 
-                          key={row.id} 
-                          onClick={() => setSelectedTx({ ...row, kind: 'payment' })}
-                          className={`border-b border-whisper-border/50 hover:bg-surface-container-low/80 transition-colors cursor-pointer ${selectedTx?.id === row.id ? 'bg-surface-container-low/80' : ''}`}
-                        >
-                          <td className="py-4 px-5">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-mono text-xs font-bold text-deep-slate">{row.id}</span>
-                              <span className="text-[11px] text-muted-steel">{row.property}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-5">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-deep-slate font-medium">{row.type}</span>
-                              <span className="text-[11px] text-muted-steel font-mono">{row.payer}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-5">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-mono text-sm font-bold text-deep-slate">{row.amount}</span>
-                              <span className="text-[11px] text-muted-steel">{row.method}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-5 text-muted-steel">{row.date}</td>
-                          <td className="py-4 px-5">
-                            <span className={`px-2.5 py-1 rounded text-[10px] font-mono tracking-widest font-bold border ${getStatusColor(row.status)}`}>
-                              {row.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : activeTab === 'Sales' ? (
-                  <table className="w-full text-left border-collapse min-w-[800px]">
-                     <thead className="bg-surface-container-low/50 sticky top-0 z-10">
-                      <tr>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">ID / Property</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Buyer / Rep</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Amount / Progress</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Docs</th>
-                        <th className="py-3 px-5 font-mono text-[10px] text-muted-steel uppercase font-bold tracking-widest border-b border-whisper-border">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="font-body text-sm align-top">
-                      {salesData.map((row) => (
-                        <tr 
-                          key={row.id} 
-                          onClick={() => setSelectedTx({ ...row, kind: 'sale' })}
-                          className={`border-b border-whisper-border/50 hover:bg-surface-container-low/80 transition-colors cursor-pointer ${selectedTx?.id === row.id ? 'bg-surface-container-low/80' : ''}`}
-                        >
-                          <td className="py-4 px-5">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-mono text-xs font-bold text-deep-slate">{row.id}</span>
-                              <span className="text-sm font-medium text-deep-slate">{row.property}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-5">
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-deep-slate font-medium">{row.buyer}</span>
-                              <span className="text-[11px] text-muted-steel">Rep: {row.facilitator}</span>
-                            </div>
-                          </td>
-                          <td className="py-4 px-5">
-                            <div className="flex flex-col gap-1">
-                              <span className="font-mono text-sm font-bold text-deep-slate">{row.amount}</span>
-                              <div className="flex items-center gap-2">
-                                <div className="h-1.5 w-16 bg-surface-container-high rounded overflow-hidden">
-                                  <div className="h-full bg-emerald-trust" style={{ width: row.progress }}></div>
-                                </div>
-                                <span className="text-[10px] font-mono text-muted-steel">{row.progress}</span>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-4 px-5">
-                             <div className="flex flex-col gap-1.5 items-start">
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-mono tracking-widest font-bold border ${getStatusColor(row.titleStatus)}`}>Title: {row.titleStatus}</span>
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-mono tracking-widest font-bold border ${getStatusColor(row.agreement)}`}>Agr: {row.agreement}</span>
-                             </div>
-                          </td>
-                          <td className="py-4 px-5 text-muted-steel">{row.date}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-12 text-center h-64">
-                    <div className="w-16 h-16 bg-surface-container-low rounded-full flex items-center justify-center mb-4">
-                      <Search className="w-8 h-8 text-muted-steel/50" />
-                    </div>
-                    <p className="text-deep-slate font-medium mb-1">Select a section to view records</p>
-                    <p className="text-sm text-muted-steel max-w-sm">Data for {activeTab} will populate here based on operational activity.</p>
-                  </div>
-                )}
-              </div>
+            <div className="flex gap-2 w-full lg:w-auto h-14">
+              <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 h-full px-5 bg-pure-surface rounded-xl border border-whisper-border shadow-sm text-[14px] font-medium text-slate-600 hover:text-deep-slate hover:bg-surface-container-lowest transition-colors">
+                <ArrowUpDown className="w-4 h-4 text-muted-steel" />
+                <span>Sort</span>
+              </button>
+              <button className="flex-1 lg:flex-none flex items-center justify-center gap-2 h-full px-5 bg-pure-surface rounded-xl border border-whisper-border shadow-sm text-[14px] font-medium text-slate-600 hover:text-deep-slate hover:bg-surface-container-lowest transition-colors">
+                <Filter className="w-4 h-4 text-muted-steel" />
+                <span>Filter</span>
+              </button>
             </div>
           </div>
 
-          {/* Transaction Detail Drawer Overlay */}
-          <AnimatePresence>
-            {selectedTx && (
-              <motion.div 
-                initial={{ x: '100%', opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                exit={{ x: '100%', opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                className="absolute right-0 top-0 bottom-0 w-full lg:w-[380px] bg-pure-surface border border-whisper-border rounded-lg shadow-xl flex flex-col z-10 overflow-hidden"
-              >
-                <div className="flex justify-between items-center p-4 border-b border-whisper-border bg-surface-container-low/50">
-                  <h3 className="font-headline text-lg font-medium text-deep-slate">{selectedTx.kind === 'payment' ? 'Payment Record' : 'Sale Record'}</h3>
-                  <button onClick={() => setSelectedTx(null)} className="p-1.5 text-muted-steel hover:bg-surface-container-high hover:text-deep-slate rounded-full transition-colors flex-shrink-0">
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                  {/* Status Banner */}
-                  <div className="flex items-center justify-between pb-4 border-b border-whisper-border">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-mono text-xl font-bold text-deep-slate">{selectedTx.id}</span>
-                      <span className="text-[11px] text-muted-steel font-mono">Recorded: {selectedTx.date}</span>
-                    </div>
-                    {selectedTx.status && (
-                       <span className={`px-2.5 py-1.5 rounded text-[11px] font-mono tracking-widest font-bold border ${getStatusColor(selectedTx.status)}`}>
-                        {selectedTx.status}
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest font-bold mb-1">Total Amount</span>
-                      <span className="font-mono text-3xl font-bold text-deep-slate">{selectedTx.amount}</span>
-                    </div>
-
-                    <div className="bg-surface-container-low/50 rounded p-4 space-y-4 border border-whisper-border/50">
-                       <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1">
-                          <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest">Property</span>
-                          <span className="text-sm font-medium text-deep-slate">{selectedTx.property}</span>
+          {/* Main Content Area */}
+          <div className="relative flex-grow min-h-[500px]">
+             <div className="grid grid-cols-1 gap-3 md:gap-4 pb-10">
+              {displayData.map((row) => {
+                const Icon = row.icon;
+                return (
+                  <div 
+                    key={row.id} 
+                    onClick={() => setSelectedTx(row)}
+                    className={`bg-pure-surface border border-whisper-border rounded-xl md:rounded-2xl p-4 md:p-6 shadow-sm hover:shadow-md hover:border-slate-300 transition-all cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-4 ${selectedTx?.id === row.id ? 'ring-2 ring-deep-slate border-transparent' : ''}`}
+                  >
+                    <div className="flex items-start md:items-center gap-3 md:gap-4 w-full md:w-auto">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-surface-container-lowest border border-whisper-border text-deep-slate flex items-center justify-center flex-shrink-0 mt-0.5 md:mt-0">
+                        <Icon className="w-5 h-5 md:w-6 md:h-6 text-muted-steel" />
+                      </div>
+                      <div className="flex flex-col gap-0.5 md:gap-1 flex-1 min-w-0">
+                        <div className="flex justify-between items-start md:block w-full">
+                           <span className="font-medium text-base md:text-lg text-deep-slate leading-tight">{row.type}</span>
+                           {/* Show amount on mobile inline if it exists, rather than a separate row, to save space. */}
+                           <span className="md:hidden font-mono text-base font-bold text-deep-slate ml-2">{row.amount !== '-' && row.amount}</span>
                         </div>
-                         {selectedTx.kind === 'payment' ? (
-                            <>
-                              <div className="flex flex-col gap-1">
-                                <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest">Payer</span>
-                                <span className="text-sm font-medium text-deep-slate">{selectedTx.payer}</span>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest">Type</span>
-                                <span className="text-sm font-medium text-deep-slate">{selectedTx.type}</span>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest">Method</span>
-                                <span className="text-sm font-medium text-deep-slate">{selectedTx.method}</span>
-                              </div>
-                            </>
-                         ) : (
-                            <>
-                              <div className="flex flex-col gap-1">
-                                <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest">Buyer</span>
-                                <span className="text-sm font-medium text-deep-slate">{selectedTx.buyer}</span>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest">Rep/Agent</span>
-                                <span className="text-sm font-medium text-deep-slate">{selectedTx.facilitator}</span>
-                              </div>
-                              <div className="flex flex-col gap-1">
-                                <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest">Progress</span>
-                                <span className="text-sm font-medium text-deep-slate flex items-center gap-2">
-                                  <div className="h-1.5 w-12 bg-surface-container-high rounded overflow-hidden mt-0.5">
-                                    <div className="h-full bg-emerald-trust" style={{ width: selectedTx.progress }}></div>
-                                  </div>
-                                  {selectedTx.progress}
-                                </span>
-                              </div>
-                            </>
-                         )}
-                       </div>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 text-[12px] md:text-[13px] text-muted-steel mt-0.5">
+                          <span className="font-mono">{row.txId}</span>
+                          <span className="hidden sm:block w-1 h-1 rounded-full bg-whisper-border"></span>
+                          <span className="truncate">{row.property}</span>
+                          <span className="hidden sm:block w-1 h-1 rounded-full bg-whisper-border"></span>
+                          <span className="truncate">{row.entity}</span>
+                        </div>
+                        <span className="md:hidden text-[11px] text-muted-steel mt-1">{row.date}</span>
+                      </div>
                     </div>
-
-                    <div className="pt-2">
-                       <span className="font-mono text-[10px] text-muted-steel uppercase tracking-widest font-bold block mb-3">Audit Trail / History</span>
-                       <div className="relative border-l border-whisper-border ml-2 space-y-4 pb-2">
-                          <div className="relative pl-4">
-                            <div className="absolute -left-1.5 top-1.5 w-2.5 h-2.5 rounded-full bg-deep-slate ring-4 ring-pure-surface"></div>
-                            <p className="text-sm text-deep-slate">Record created</p>
-                            <p className="text-[10px] text-muted-steel">{selectedTx.date} by System</p>
-                          </div>
-                           {selectedTx.status === 'Paid' && (
-                             <div className="relative pl-4">
-                              <div className="absolute -left-1.5 top-1.5 w-2.5 h-2.5 rounded-full bg-emerald-trust ring-4 ring-pure-surface"></div>
-                              <p className="text-sm text-deep-slate">Payment successful via {selectedTx.method}</p>
-                              <p className="text-[10px] text-muted-steel">{selectedTx.date} via Processor</p>
-                            </div>
-                           )}
-                       </div>
+                    
+                    <div className="hidden md:flex flex-col items-end justify-center">
+                      {row.amount !== '-' && (
+                        <span className="font-mono text-[17px] font-bold text-deep-slate">{row.amount}</span>
+                      )}
+                      <span className="text-[13px] text-muted-steel">{row.date}</span>
                     </div>
-
                   </div>
-                </div>
-                
-                <div className="p-4 border-t border-whisper-border bg-surface-container-low/30 flex gap-2">
-                   <button className="flex-1 py-2.5 px-4 bg-pure-surface border border-whisper-border text-deep-slate font-mono text-[11px] uppercase font-bold tracking-widest rounded hover:bg-surface-container-low transition-colors flex items-center justify-center gap-2">
-                     Generate Receipt
-                   </button>
-                   <button className="py-2.5 px-4 bg-deep-slate text-pure-surface rounded hover:bg-slate-800 transition-colors flex items-center justify-center">
-                     <MoreHorizontal className="w-4 h-4" />
-                   </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                );
+              })}
+            </div>
 
+            {/* Transaction Detail Fixed Drawer Overlay */}
+            <AnimatePresence>
+              {selectedTx && (
+                <>
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40"
+                    onClick={() => setSelectedTx(null)}
+                  />
+                  <motion.div 
+                    initial={{ x: '100%', boxShadow: '-20px 0 25px -5px rgba(0, 0, 0, 0)' }}
+                    animate={{ x: 0, boxShadow: '-20px 0 30px -10px rgba(0, 0, 0, 0.15)' }}
+                    exit={{ x: '100%', boxShadow: '-20px 0 25px -5px rgba(0, 0, 0, 0)' }}
+                    transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                    className="fixed top-0 right-0 h-screen w-full sm:w-[540px] bg-pure-surface z-50 border-l border-whisper-border overflow-y-auto shadow-2xl flex flex-col"
+                  >
+                    <div className="sticky top-0 z-20 flex justify-between items-center p-6 border-b border-whisper-border bg-white/90 backdrop-blur-xl">
+                      <h3 className="font-headline text-lg font-medium text-deep-slate">{viewMode === 'transactions' ? 'Transaction Record' : 'Activity Record'}</h3>
+                      <button onClick={() => setSelectedTx(null)} className="p-2 text-muted-steel hover:bg-surface-container-high hover:text-deep-slate rounded-full transition-colors flex-shrink-0">
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                      {/* Detailed Content */}
+                      <div className="flex items-center justify-between pb-6 border-b border-whisper-border/60">
+                        <div className="flex flex-col gap-2">
+                          <span className="font-headline text-2xl font-medium text-deep-slate">{selectedTx.type}</span>
+                          <span className="text-[13px] text-muted-steel font-mono">ID: {selectedTx.txId}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-6">
+                        <div className="flex flex-col gap-2">
+                          <span className="font-mono text-xs text-muted-steel uppercase tracking-widest font-medium">Record Value</span>
+                          <span className="font-headline text-4xl font-medium text-deep-slate tracking-tight">{selectedTx.amount}</span>
+                        </div>
+
+                        <div className="bg-surface-container-lowest rounded-xl p-6 space-y-5 border border-whisper-border/60">
+                          <div className="grid grid-cols-2 gap-6">
+                            <div className="flex flex-col gap-1.5">
+                              <span className="font-mono text-xs text-muted-steel uppercase tracking-widest">Property</span>
+                              <span className="text-[15px] font-medium text-deep-slate">{selectedTx.property}</span>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <span className="font-mono text-xs text-muted-steel uppercase tracking-widest">Related Entity</span>
+                              <span className="text-[15px] font-medium text-deep-slate">{selectedTx.entity}</span>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <span className="font-mono text-xs text-muted-steel uppercase tracking-widest">Date</span>
+                              <span className="text-[15px] font-medium text-deep-slate">{selectedTx.date}</span>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                              <span className="font-mono text-xs text-muted-steel uppercase tracking-widest">Category</span>
+                              <span className="text-[15px] font-medium text-deep-slate capitalize">{selectedTx.kind}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-whisper-border/60">
+                          <div className="flex flex-col gap-1.5">
+                            <span className="font-mono text-xs text-muted-steel uppercase tracking-widest">Date Created</span>
+                            <span className="text-[15px] font-medium text-deep-slate">{selectedTx.date} by System</span>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                    
+                    <div className="p-6 border-t border-whisper-border bg-white flex gap-3">
+                       <button className="flex-1 h-12 bg-pure-surface border border-whisper-border text-deep-slate font-medium text-[14px] rounded-lg hover:bg-surface-container-lowest transition-colors flex items-center justify-center shadow-sm">
+                         View Details
+                       </button>
+                       <button className="h-12 w-12 bg-surface-container-low text-deep-slate rounded-lg hover:bg-surface-container-highest transition-colors flex items-center justify-center">
+                         <MoreHorizontal className="w-5 h-5" />
+                       </button>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </DashboardLayout>
