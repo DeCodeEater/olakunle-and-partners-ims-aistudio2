@@ -1,6 +1,6 @@
 'use client';
 
-import { LineChart, Line, ResponsiveContainer, Tooltip, ReferenceLine } from 'recharts';
+import { LineChart, Line, ResponsiveContainer, Tooltip, ReferenceLine, YAxis } from 'recharts';
 import { Activity, TrendingDown, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -41,9 +41,10 @@ export function YieldKpiChart() {
 
         <div className="relative z-10 flex-grow w-full h-[60px] min-h-[60px] -mx-1 mt-2 mb-2" title="Below target by 0.6% — 3M trend: declining">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
+            <LineChart data={data} margin={{ top: 15, right: 0, left: 0, bottom: 5 }}>
+              <YAxis hide domain={[6, 9.5]} />
               <Tooltip cursor={false} contentStyle={{ backgroundColor: '#141f30', border: 'none', borderRadius: '4px', fontSize: '10px', color: '#fff', padding: '4px' }} itemStyle={{ color: '#fff' }} />
-              <ReferenceLine y={9.0} stroke="#64748b" strokeDasharray="3 3" label={{ position: 'insideTopLeft', value: 'Target 9%', fill: '#64748b', fontSize: 10 }} />
+              <ReferenceLine y={9.0} stroke="#64748b" strokeDasharray="3 3" label={{ position: 'insideBottomLeft', value: 'Target 9%', fill: '#64748b', fontSize: 10 }} />
               <Line type="monotone" dataKey="val" stroke="#0f172a" strokeWidth={2} dot={{ r: 2, fill: '#0f172a', strokeWidth: 0 }} activeDot={{ r: 4 }} />
             </LineChart>
           </ResponsiveContainer>

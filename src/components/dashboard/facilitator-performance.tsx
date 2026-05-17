@@ -19,7 +19,7 @@ export function FacilitatorPerformance() {
         </div>
       </div>
 
-      <div className="flex-grow min-h-[220px] w-full relative mt-2 hidden sm:block">
+      <div className="flex-grow w-full relative mt-2 hidden sm:block h-[220px] lg:h-[280px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
             <defs>

@@ -114,7 +114,7 @@ export function FinancialChart() {
             <span className="text-[10px] font-mono text-muted-steel uppercase font-medium bg-surface-container-low px-2 py-1 rounded">Current: {formatCurrencyPrecise(currentData.chart[currentData.chart.length - 1].revenue)}</span>
           </div>
           
-          <div className="flex-grow min-h-[220px] max-h-[280px] lg:max-h-none w-full relative sm:block">
+          <div className="flex-grow w-full relative sm:block h-[220px] lg:h-[280px]">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={currentData.chart} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <defs>

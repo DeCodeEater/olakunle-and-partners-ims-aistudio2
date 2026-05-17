@@ -20,7 +20,7 @@ export function RecentExpenses() {
         </div>
       </div>
 
-      <div className="flex-grow min-h-[220px] w-full relative mt-2">
+      <div className="flex-grow w-full relative mt-2 h-[220px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#e2e8f0" />

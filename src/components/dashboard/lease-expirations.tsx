@@ -42,8 +42,8 @@ export function LeaseExpirations() {
         </div>
       </div>
 
-      <div className="flex-grow min-h-[220px] max-h-[280px] lg:max-h-[300px] w-full relative mt-2 overflow-x-auto overflow-y-hidden no-scrollbar">
-        <div className="min-w-[500px] lg:min-w-0 h-full min-h-[220px] w-full">
+      <div className="flex-grow w-full relative mt-2 overflow-x-auto overflow-y-hidden no-scrollbar">
+        <div className="min-w-[500px] lg:min-w-0 h-[220px] lg:h-[260px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
