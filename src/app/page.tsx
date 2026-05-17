@@ -10,7 +10,7 @@ import { ActivityHub } from '@/components/dashboard/activity-hub';
 import { TenantSatisfaction } from '@/components/dashboard/tenant-satisfaction';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { motion, Variants, AnimatePresence } from 'motion/react';
-import { ChevronDown, Building2, AlertTriangle, X, ArrowRight } from 'lucide-react';
+import { Building2, AlertTriangle, X, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 
 const container: Variants = {
@@ -29,7 +29,6 @@ const item: Variants = {
 };
 
 export default function Page() {
-  const [role, setRole] = useState<'manager' | 'landlord' | 'facilitator'>('manager');
   const [isLoading, setIsLoading] = useState(true);
   const [alerts, setAlerts] = useState([
     { id: 1, text: '3 leases expiring in <30 days', urgent: true },
@@ -44,7 +43,7 @@ export default function Page() {
     setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 800);
     return () => clearTimeout(timer);
-  }, [role]);
+  }, []);
 
   return (
     <DashboardLayout>
@@ -54,34 +53,6 @@ export default function Page() {
         animate="show"
         className="max-w-[1800px] w-full mx-auto p-fluid-s space-y-fluid-m flex flex-col"
       >
-        <motion.div variants={item} className="flex flex-col sm:flex-row sm:items-center justify-between gap-fluid-xs order-1">
-          <div>
-            <h2 className="font-headline text-fluid-2xl text-deep-slate leading-tight tracking-tight font-medium">
-              Good morning, Olakunle
-            </h2>
-            <p suppressHydrationWarning className="text-muted-steel text-sm mt-1 font-mono">Today is {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</p>
-          </div>
-
-          <div className="relative group self-start sm:self-auto z-20 hidden md:block">
-            <button className="flex items-center gap-2 bg-pure-surface border border-whisper-border px-4 py-2 rounded-lg text-sm font-medium text-deep-slate hover:shadow-sm transition-all focus:outline-none">
-              <span className="text-muted-steel font-normal">View as:</span>
-              <span className="capitalize">{role === 'manager' ? 'Property Manager' : role === 'landlord' ? 'Landlord' : 'Facilitator'}</span>
-              <ChevronDown className="w-4 h-4 ml-1 text-muted-steel" />
-            </button>
-            <div className="absolute right-0 top-full mt-2 w-48 bg-pure-surface border border-whisper-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all flex flex-col p-1">
-              <button onClick={() => setRole('manager')} className={`text-left px-3 py-2 text-sm rounded-md transition-colors ${role === 'manager' ? 'bg-surface-container-low font-bold text-deep-slate' : 'text-muted-steel hover:bg-surface-container-low hover:text-deep-slate'}`}>
-                Property Manager
-              </button>
-              <button onClick={() => setRole('landlord')} className={`text-left px-3 py-2 text-sm rounded-md transition-colors ${role === 'landlord' ? 'bg-surface-container-low font-bold text-deep-slate' : 'text-muted-steel hover:bg-surface-container-low hover:text-deep-slate'}`}>
-                Landlord
-              </button>
-              <button onClick={() => setRole('facilitator')} className={`text-left px-3 py-2 text-sm rounded-md transition-colors ${role === 'facilitator' ? 'bg-surface-container-low font-bold text-deep-slate' : 'text-muted-steel hover:bg-surface-container-low hover:text-deep-slate'}`}>
-                Facilitator
-              </button>
-            </div>
-          </div>
-        </motion.div>
-
         {isLoading ? (
           <div className="space-y-fluid-m animate-pulse order-2">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-fluid-s">
@@ -95,19 +66,6 @@ export default function Page() {
             </div>
             <div className="h-[400px] bg-whisper-border rounded-lg"></div>
           </div>
-        ) : role === 'landlord' ? (
-          <motion.div variants={item} className="flex flex-col items-center justify-center p-12 lg:p-24 bg-pure-surface border border-whisper-border rounded-lg shadow-sm text-center order-2">
-            <div className="w-20 h-20 bg-surface-container-low rounded-full flex items-center justify-center mb-6">
-              <Building2 className="w-10 h-10 text-muted-steel" />
-            </div>
-            <h3 className="font-headline text-2xl font-bold text-deep-slate mb-2">No properties yet</h3>
-            <p className="text-muted-steel max-w-sm mb-8 font-body">
-              Your portfolio is currently empty. Add your first property to start tracking income, expenses, and tenant details.
-            </p>
-            <button className="bg-deep-slate text-pure-surface font-medium px-6 py-3 rounded-lg hover:bg-opacity-90 transition-all font-mono text-sm tracking-wide">
-              Add First Property
-            </button>
-          </motion.div>
         ) : (
           <>
             {/* Mobile Alerts - Only visible on small screens */}

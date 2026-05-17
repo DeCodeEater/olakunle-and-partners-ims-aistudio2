@@ -1,4 +1,4 @@
-import { Search, Bell, Menu, Clock, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
+import { Bell, Menu, Clock, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -19,15 +19,13 @@ export function Header({ onToggleSidebar }: HeaderProps) {
         </button>
       </div>
 
-      <div className="flex-1 max-w-xl hidden sm:block lg:ml-0">
-        <div className="flex items-center gap-2 bg-surface-container-low/50 border border-whisper-border rounded-full h-10 px-4 focus-within:border-muted-steel/50 focus-within:bg-pure-surface transition-all">
-          <Search className="w-4 h-4 text-muted-steel flex-shrink-0" />
-          <input 
-            className="bg-transparent border-none focus:ring-0 text-sm font-body w-full text-deep-slate placeholder:text-muted-steel outline-none h-full" 
-            placeholder="Search operational data..." 
-            type="text" 
-          />
-        </div>
+      <div className="flex-1 hidden sm:block lg:ml-0">
+        <h2 className="font-headline text-lg text-deep-slate leading-tight tracking-tight font-medium">
+          Good morning, Olakunle
+        </h2>
+        <p suppressHydrationWarning className="text-muted-steel text-xs font-mono">
+          Today is {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+        </p>
       </div>
 
       <div className="flex items-center justify-end gap-2 lg:gap-4 flex-1">
