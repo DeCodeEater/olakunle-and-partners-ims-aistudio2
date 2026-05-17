@@ -37,8 +37,8 @@ export function ActionCenter() {
     <div className="bg-pure-surface border border-whisper-border rounded-lg p-fluid-s lg:p-fluid-m flex flex-col h-full shadow-sm">
       <div className="flex justify-between items-center mb-fluid-s border-b border-whisper-border pb-fluid-xs">
         <div>
-          <h3 className="font-headline text-fluid-lg text-deep-slate uppercase tracking-tight font-medium">Quick Actions</h3>
-          <p className="font-mono text-fluid-xs text-muted-steel mt-1 uppercase tracking-widest font-medium">Common Tasks</p>
+          <h3 className="font-headline text-fluid-lg text-deep-slate font-medium">Quick Actions</h3>
+          <p className="font-mono text-fluid-xs text-muted-steel mt-1 font-medium">Common Tasks</p>
         </div>
       </div>
 

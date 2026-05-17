@@ -107,3 +107,11 @@
   background-color: rgba(156, 163, 175, 0.3);
   border-radius: 20px;
 }
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}

@@ -25,7 +25,7 @@ const unifiedData = [
 ];
 
 export default function ActivityPage() {
-  const [selectedTx, setSelectedTx] = useState<any | null>(null);
+  const [selectedTx, setSelectedTx] = useState<typeof unifiedData[0] | null>(null);
   const [viewMode, setViewMode] = useState<'activities' | 'transactions'>('activities');
 
   const getStatusColor = (status: string) => {

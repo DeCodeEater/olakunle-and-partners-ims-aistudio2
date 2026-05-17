@@ -17,10 +17,10 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-const NavItem = ({ href, icon: Icon, children, isActive = false, fillOnActive = false }: { href: string; icon: any; children: React.ReactNode; isActive?: boolean; fillOnActive?: boolean }) => {
+const NavItem = ({ href, icon: Icon, children, isActive = false, fillOnActive = false }: { href: string; icon: React.ElementType; children: React.ReactNode; isActive?: boolean; fillOnActive?: boolean }) => {
   return (
     <li>
-      <Link href={href} className="group flex items-center gap-3.5 px-8 py-2.5 transition-all duration-300 relative focus:outline-none">
+      <Link href={href} className="group flex items-center gap-3.5 px-8 py-3 min-h-[44px] transition-all duration-300 relative focus:outline-none">
         {isActive && (
           <motion.div 
             layoutId="sidebar-active-indicator"
@@ -48,7 +48,7 @@ const CollapsibleSection = ({ title, children, defaultOpen = true }: { title: st
     <div className="mb-2">
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="w-full flex items-center justify-between px-8 mb-1 py-1.5 group focus:outline-none"
+        className="w-full flex items-center justify-between px-8 mb-1 py-2 min-h-[44px] group focus:outline-none"
       >
         <span className="font-mono text-[10px] text-muted-steel uppercase tracking-[0.15em] font-bold group-hover:text-deep-slate transition-colors">
           {title}
@@ -106,16 +106,16 @@ const QuickActionsMenu = () => {
                 <span className="font-mono text-[10px] text-muted-steel uppercase tracking-[0.15em] font-bold">New Action</span>
              </div>
              <div className="flex flex-col gap-0.5">
-               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
+               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 min-h-[44px] text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
                  <Banknote className="w-4 h-4 text-muted-steel" /> New Expense
                </button>
-               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
+               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 min-h-[44px] text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
                  <Building className="w-4 h-4 text-muted-steel" /> New Property
                </button>
-               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
+               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 min-h-[44px] text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
                  <FilePlus className="w-4 h-4 text-muted-steel" /> New Document
                </button>
-               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
+               <button onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-3 py-3 min-h-[44px] text-[13px] font-medium text-deep-slate rounded-lg hover:bg-surface-container-low transition-colors w-full text-left">
                  <ArrowRightLeft className="w-4 h-4 text-muted-steel" /> Change Ownership
                </button>
              </div>
@@ -124,7 +124,7 @@ const QuickActionsMenu = () => {
       </AnimatePresence>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-[#0b1021] text-pure-surface font-mono text-[11px] font-bold py-3.5 rounded-lg hover:bg-opacity-90 transition-all active:translate-y-px flex items-center justify-center gap-2 relative z-10"
+        className="w-full bg-[#0b1021] text-pure-surface font-mono text-[11px] font-bold py-3.5 min-h-[44px] rounded-lg hover:bg-opacity-90 transition-all active:translate-y-px flex items-center justify-center gap-2 relative z-10"
       >
         <Zap className="w-4 h-4 mt-[1px]" strokeWidth={2.5} />
         QUICK ACTIONS
@@ -171,13 +171,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         >
           <X className="w-5 h-5" />
         </button>
-        <div className="px-6 mb-8 flex-shrink-0 hidden lg:block">
-          <h1 className="font-headline text-2xl font-bold text-deep-slate leading-tight tracking-tighter">
-            Olakunle & Partners
-          </h1>
-          <p className="font-mono text-[10px] text-muted-steel mt-1 uppercase tracking-widest">
-            Internal Management system
-          </p>
+        <div className="px-6 mb-8 flex-shrink-0 hidden lg:flex items-center gap-3">
+          <div className="w-9 h-9 flex-shrink-0 bg-deep-slate text-pure-surface border border-whisper-border rounded-lg shadow-sm flex items-center justify-center">
+            <span className="font-headline font-bold text-lg tracking-tighter">O</span>
+          </div>
+          <div>
+            <h1 className="font-headline text-lg font-bold text-deep-slate leading-tight tracking-tight">
+              Olakunle & Partners
+            </h1>
+            <p className="font-mono text-[9px] text-muted-steel uppercase tracking-widest">
+              Management System
+            </p>
+          </div>
         </div>
         
         <div className="overflow-y-auto sidebar-scroll flex-grow pb-4 -mx-1">

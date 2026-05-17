@@ -84,8 +84,8 @@ export function AddPropertyModal({ isOpen, onClose, onSuccess, defaultListingTyp
       await createProperty(payload);
       onSuccess();
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Failed to create property');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create property');
     } finally {
       setIsSubmitting(false);
     }
@@ -285,7 +285,7 @@ export function AddPropertyModal({ isOpen, onClose, onSuccess, defaultListingTyp
                         className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-trust/20 focus:border-emerald-trust transition-all duration-200"
                       >
                         <option value="C_OF_O">C of O</option>
-                        <option value="GOVERNORS_CONSENT">Governor's Consent</option>
+                        <option value="GOVERNORS_CONSENT">Governor&apos;s Consent</option>
                         <option value="DEED_OF_ASSIGNMENT">Deed of Assignment</option>
                         <option value="EXCISION">Excision</option>
                       </select>

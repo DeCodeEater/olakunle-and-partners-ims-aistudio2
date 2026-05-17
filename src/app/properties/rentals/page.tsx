@@ -297,7 +297,7 @@ export default function RentalsPage() {
                   <div className="col-span-full py-20 flex flex-col items-center justify-center text-center bg-slate-50 border border-dashed border-whisper-border rounded-xl">
                     <Search className="w-8 h-8 text-slate-300 mb-3" />
                     <h3 className="text-lg font-semibold text-deep-slate">No properties found</h3>
-                    <p className="text-sm text-slate-500 mt-1 max-w-sm">We couldn't find any properties matching "{searchQuery}". Try adjusting your search or add a new listing.</p>
+                    <p className="text-sm text-slate-500 mt-1 max-w-sm">We couldn&apos;t find any properties matching &quot;{searchQuery}&quot;. Try adjusting your search or add a new listing.</p>
                   </div>
                 )}
               </div>

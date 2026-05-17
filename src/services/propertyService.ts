@@ -8,7 +8,7 @@
 import { apiFetch } from './api';
 import { PropertyRecord, PropertyCreatePayload } from '../types/property';
 
-export interface PropertyUpdatePayload extends Partial<PropertyCreatePayload> {}
+export type PropertyUpdatePayload = Partial<PropertyCreatePayload>;
 
 // ── API Functions ─────────────────────────────────────
 

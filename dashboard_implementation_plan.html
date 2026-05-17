@@ -1,0 +1,756 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary);padding:0 0 2rem}
+
+.phase{margin-bottom:2rem}
+.phase-header{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:var(--border-radius-lg);margin-bottom:12px;border:0.5px solid var(--color-border-tertiary)}
+.phase-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;flex-shrink:0}
+.phase-info{flex:1}
+.phase-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.phase-meta{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.phase-badge{font-size:11px;font-weight:500;padding:3px 10px;border-radius:99px;flex-shrink:0}
+
+.task-list{display:flex;flex-direction:column;gap:8px}
+.task{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:0;overflow:hidden}
+.task-main{display:flex;align-items:flex-start;gap:10px;padding:12px 14px}
+.check{width:18px;height:18px;border-radius:4px;border:1.5px solid var(--color-border-secondary);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.check.done{background:#639922;border-color:#639922}
+.check.done::after{content:'✓';color:#fff;font-size:11px;font-weight:500}
+.task-body{flex:1}
+.task-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:3px;line-height:1.4}
+.task-title.done-title{text-decoration:line-through;color:var(--color-text-secondary)}
+.task-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.6}
+.task-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px}
+.pill{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500;border:0.5px solid}
+.pill-design{background:#EEEDFE;color:#3C3489;border-color:#AFA9EC}
+.pill-code{background:#E6F1FB;color:#185FA5;border-color:#85B7EB}
+.pill-ux{background:#FAEEDA;color:#854F0B;border-color:#EF9F27}
+.pill-data{background:#EAF3DE;color:#3B6D11;border-color:#97C459}
+.pill-mobile{background:#FAECE7;color:#993C1D;border-color:#F0997B}
+.effort{font-size:10px;color:var(--color-text-secondary);margin-left:auto;flex-shrink:0}
+
+.task-detail{padding:0 14px 12px 42px;font-size:11px;color:var(--color-text-secondary);line-height:1.7;border-top:0.5px solid var(--color-border-tertiary);padding-top:10px;display:none}
+.task-detail.open{display:block}
+.task-toggle{background:none;border:none;cursor:pointer;padding:12px 14px 12px 0;color:var(--color-text-secondary);font-size:11px;flex-shrink:0;display:flex;align-items:center;gap:3px;margin-top:1px}
+.task-toggle:hover{color:var(--color-text-primary)}
+
+.progress-bar-wrap{display:flex;align-items:center;gap:10px;margin-bottom:2rem;padding:14px 16px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary)}
+.progress-track{flex:1;height:8px;background:var(--color-background-primary);border-radius:99px;overflow:hidden;border:0.5px solid var(--color-border-tertiary)}
+.progress-fill{height:100%;border-radius:99px;background:#639922;width:0%;transition:width .4s}
+.progress-label{font-size:12px;font-weight:500;color:var(--color-text-primary);min-width:70px;text-align:right}
+.progress-count{font-size:11px;color:var(--color-text-secondary);min-width:80px}
+
+.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:2rem}
+.sum-card{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px;text-align:center}
+.sum-num{font-size:22px;font-weight:500;color:var(--color-text-primary);line-height:1}
+.sum-label{font-size:11px;color:var(--color-text-secondary);margin-top:4px}
+
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:1.5rem 0}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:1.5rem}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text-secondary)}
+.leg-dot{width:8px;height:8px;border-radius:2px}
+
+.section-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+
+.reset-btn{background:none;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:4px 12px;font-size:11px;color:var(--color-text-secondary);cursor:pointer;float:right}
+.reset-btn:hover{background:var(--color-background-secondary)}
+</style>
+
+<h2 class="sr-only">Dashboard implementation plan and interactive task checklist</h2>
+
+<div class="progress-bar-wrap">
+  <span class="progress-count" id="count-label">0 of 24 done</span>
+  <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
+  <span class="progress-label" id="prog-pct">0% complete</span>
+  <button class="reset-btn" onclick="resetAll()">Reset</button>
+</div>
+
+<div class="summary-grid">
+  <div class="sum-card"><div class="sum-num" style="color:#A32D2D">4</div><div class="sum-label">Critical fixes</div></div>
+  <div class="sum-card"><div class="sum-num" style="color:#854F0B">8</div><div class="sum-label">Moderate fixes</div></div>
+  <div class="sum-card"><div class="sum-num" style="color:#185FA5">7</div><div class="sum-label">Improvements</div></div>
+  <div class="sum-card"><div class="sum-num" style="color:#3B6D11">5</div><div class="sum-label">New additions</div></div>
+</div>
+
+<div class="legend">
+  <span class="leg-item"><span class="leg-dot" style="background:#7F77DD"></span>Design task</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#378ADD"></span>Code / dev task</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#EF9F27"></span>UX / interaction</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#639922"></span>Data viz</span>
+  <span class="leg-item"><span class="leg-dot" style="background:#D85A30"></span>Mobile</span>
+</div>
+
+<!-- PHASE 1 -->
+<div class="phase">
+  <div class="phase-header" style="background:#FCEBEB;border-color:#F7C1C1">
+    <div class="phase-num" style="background:#A32D2D;color:#fff">1</div>
+    <div class="phase-info">
+      <div class="phase-title" style="color:#791F1F">Phase 1 — Critical fixes</div>
+      <div class="phase-meta" style="color:#A32D2D">Fix everything that actively misleads users or breaks the design system · Estimated: 3–5 days</div>
+    </div>
+    <span class="phase-badge" style="background:#F7C1C1;color:#791F1F">Do first</span>
+  </div>
+  <div class="task-list">
+
+    <div class="task" id="t1">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t1')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Fix Recent Expenses bar chart colors</div>
+          <div class="task-desc">Replace the random 5-color scheme with a single navy color for all bars. Reserve color only for over-budget status.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-data">Data viz</span>
+            <span class="effort">~30 min</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t1d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t1d">
+        1. Open your design file and select all bars in the expense chart.<br>
+        2. Set all bars to your primary brand navy (#0f172a or equivalent).<br>
+        3. Define a rule: if a category exceeds budget, that bar turns red (#E24B4A). Otherwise always navy.<br>
+        4. Remove the color legend — you no longer need it.<br>
+        5. Add a thin dashed vertical line at the budget threshold if one exists.
+      </div>
+    </div>
+
+    <div class="task" id="t2">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t2')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Add legend to Lease Expiration Timeline urgency colors</div>
+          <div class="task-desc">The red/orange/green urgency system is a good idea but completely unexplained. Add a 3-item legend and subtitle.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-data">Data viz</span>
+            <span class="effort">~1 hr</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t2d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t2d">
+        1. Add a subtitle under "Upcoming Leases (Next 7 Months)": "Bar color indicates days to expiry."<br>
+        2. Add a horizontal legend row above the chart: <span style="color:#A32D2D">● Urgent &lt;30 days</span> · <span style="color:#854F0B">● Soon 30–90 days</span> · <span style="color:#3B6D11">● Planned 90+ days</span><br>
+        3. Define exact thresholds in your data model and apply them consistently.<br>
+        4. Add a "View expiring leases →" link below the chart that routes to Properties filtered by expiry date.
+      </div>
+    </div>
+
+    <div class="task" id="t3">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t3')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Add Y-axis values and gridlines to Revenue Growth chart</div>
+          <div class="task-desc">The most prominent chart on the page currently has no scale. A user cannot read it. Add gridlines, naira labels, and a callout on the latest data point.</div>
+          <div class="task-meta">
+            <span class="pill pill-data">Data viz</span>
+            <span class="pill pill-code">Code</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t3d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t3d">
+        1. Enable Y-axis on your chart library config. Labels format: ₦100M, ₦200M, ₦300M etc.<br>
+        2. Add 3–4 horizontal gridlines at equal intervals (light grey, 0.5px).<br>
+        3. Add a callout bubble at the rightmost (most recent) data point showing the current value.<br>
+        4. Add a hover tooltip showing exact value + date for every data point.<br>
+        5. Optionally: annotate the 2022 dip with a small label ("Market correction" or the real cause).
+      </div>
+    </div>
+
+    <div class="task" id="t4">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t4')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Clarify Financial Performance time filter scope</div>
+          <div class="task-desc">It's currently unclear whether the 1W/1M/3M toggle controls the line chart, the Income vs. Expense panel, or both. Make the scope explicit.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-ux">UX</span>
+            <span class="effort">~1.5 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t4d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t4d">
+        1. Recommended approach: Move the time toggle to the very top of the Financial Performance section, spanning the full width above both panels.<br>
+        2. Add a shared section subtitle: "All figures below reflect the selected period."<br>
+        3. When a filter is selected, both the chart and the ₦428.5M / ₦184.2M figures should update simultaneously.<br>
+        4. Show the active period label next to each figure: e.g. "₦428.5M (3M)" so context is always visible even if the toggle is scrolled out of view.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PHASE 2 -->
+<div class="phase">
+  <div class="phase-header" style="background:#FAEEDA;border-color:#FAC775">
+    <div class="phase-num" style="background:#854F0B;color:#fff">2</div>
+    <div class="phase-info">
+      <div class="phase-title" style="color:#633806">Phase 2 — Interaction & data depth</div>
+      <div class="phase-meta" style="color:#854F0B">Make charts and cards actually interactive and informative · Estimated: 1–2 weeks</div>
+    </div>
+    <span class="phase-badge" style="background:#FAC775;color:#633806">High value</span>
+  </div>
+  <div class="task-list">
+
+    <div class="task" id="t5">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t5')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Make all 4 KPI cards clickable with hover states</div>
+          <div class="task-desc">Each card should navigate to its relevant section pre-filtered. Revenue → Financial Reports. Occupancy → Properties filtered by status. Properties → Properties list. Yield → Financial Reports.</div>
+          <div class="task-meta">
+            <span class="pill pill-ux">UX</span>
+            <span class="pill pill-code">Code</span>
+            <span class="effort">~3 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t5d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t5d">
+        1. Add cursor: pointer and a hover state (very subtle background shift, e.g. bg goes from white to #f8fafc) to all 4 KPI cards.<br>
+        2. Add a "View details →" text link at the bottom of each card, visible on hover.<br>
+        3. Wire up navigation routes:<br>
+        &nbsp;&nbsp;· Total Sales Revenue → /finance/reports?period=ytd<br>
+        &nbsp;&nbsp;· Occupied vs Vacant → /properties?filter=occupancy<br>
+        &nbsp;&nbsp;· Properties Managed → /properties<br>
+        &nbsp;&nbsp;· Portfolio Yield → /finance/reports?view=yield<br>
+        4. Add a tooltip on hover describing what the user will see when they click.
+      </div>
+    </div>
+
+    <div class="task" id="t6">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t6')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Replace Tenant Satisfaction radar with score bar chart</div>
+          <div class="task-desc">Swap the radar for 5 horizontal score bars (one per dimension), each showing score out of 10, a target line at 7.5, and a trend arrow.</div>
+          <div class="task-meta">
+            <span class="pill pill-data">Data viz</span>
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~3 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t6d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t6d">
+        Dimensions: Maintenance · Cleanliness · Security · Response Time · Amenities<br><br>
+        Each row shows: [Dimension label] [Score bar 0–10] [Score number] [↑↓→ trend vs last quarter]<br><br>
+        1. Add an overall average score as a headline number at the top of the card (e.g. "7.2 / 10 avg").<br>
+        2. Add a vertical dashed line at 7.5 across all bars as the "acceptable" threshold.<br>
+        3. Color bars below threshold in amber, above in navy.<br>
+        4. Add "vs last quarter" small text below each row showing the delta (e.g. +0.3, -0.5).<br>
+        5. Add a "View full survey →" link at the bottom.
+      </div>
+    </div>
+
+    <div class="task" id="t7">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t7')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Add Portfolio Yield target line and status color</div>
+          <div class="task-desc">Current yield is 8.4%, target is 9.0%, trending -0.2%. This should visually signal warning status — currently nothing indicates urgency.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-data">Data viz</span>
+            <span class="effort">~1 hr</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t7d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t7d">
+        1. Add a horizontal dashed line on the sparkline at 9.0% labeled "Target".<br>
+        2. Color the "8.4%" headline value in amber (#EF9F27) since it's below target.<br>
+        3. Color the "-0.2%" delta indicator red (#E24B4A) with a downward arrow — it's moving away from target.<br>
+        4. Add a small status dot next to the card title: amber = below target, red = below and declining, green = on/above target.<br>
+        5. Consider a tooltip on the sparkline: "Below target by 0.6% — 3M trend: declining."
+      </div>
+    </div>
+
+    <div class="task" id="t8">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t8')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Upgrade Facilitator Performance chart with totals and target line</div>
+          <div class="task-desc">Add YTD totals per facilitator in the legend, a quarterly target line, and separate actual vs. projected bars visually.</div>
+          <div class="task-meta">
+            <span class="pill pill-data">Data viz</span>
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t8d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t8d">
+        1. Update legend to include YTD totals: "● Sola Adebayo — 42 deals" · "● Emeka Okafor — 38 deals" · "● Amina Yusuf — 31 deals".<br>
+        2. Add a horizontal dashed line across all quarters at the target deal count (e.g. 12/quarter).<br>
+        3. If Q4 is a future quarter: use a lighter/hatched fill for projected bars and add a footnote "Q4: projected".<br>
+        4. Optional: add a small leaderboard table below the chart with Rank / Name / Deals / % to Target / Trend.
+      </div>
+    </div>
+
+    <div class="task" id="t9">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t9')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Fix Transactions Hub tag colors and timestamp format</div>
+          <div class="task-desc">Color-code LEASE/FINANCE/DOC tags by type. Fix inconsistent timestamp format ("10 AGO" missing unit). Add urgency dot per row.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-ux">UX</span>
+            <span class="effort">~1.5 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t9d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t9d">
+        Tag color system:<br>
+        · LEASE → blue background, blue text<br>
+        · FINANCE → green background, green text<br>
+        · DOC → grey background, grey text<br>
+        · URGENT → red background, red text (for action-required items)<br><br>
+        Timestamp format — standardise to: "2h ago" · "1d ago" · "20m ago" (always lowercase, always include unit).<br><br>
+        Add a status dot to the left of each row: red = requires action, grey = informational only.<br><br>
+        Consider adding a "Mark as read" interaction on hover.
+      </div>
+    </div>
+
+    <div class="task" id="t10">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t10')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Add a notification badge system to the bell icon</div>
+          <div class="task-desc">The bell icon exists in the header but shows no unread count. Lease expirations and overdue items need to surface here.</div>
+          <div class="task-meta">
+            <span class="pill pill-ux">UX</span>
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t10d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t10d">
+        1. Add a red numeric badge on the bell icon when there are unread notifications (e.g. "3").<br>
+        2. Design a notification tray that slides in from the right or drops down from the bell.<br>
+        3. Tray contents: grouped by type — Urgent (red), Action Required (amber), Informational (grey).<br>
+        4. Auto-populate with: leases expiring in &lt;30 days, overdue rent, new documents uploaded, commission payouts pending.<br>
+        5. Add "Mark all read" and "View all notifications" actions at the bottom of the tray.
+      </div>
+    </div>
+
+    <div class="task" id="t11">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t11')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Add Income vs. Expense waterfall or donut chart</div>
+          <div class="task-desc">Currently only numbers are shown. Add a visual showing income → expenses → net margin flow so the relationship is immediately obvious.</div>
+          <div class="task-meta">
+            <span class="pill pill-data">Data viz</span>
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~2.5 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t11d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t11d">
+        Option A (recommended): A simple stacked horizontal bar — full width = Gross Income (₦428.5M), filled portion = Expenses (₦184.2M in red), remainder = Net (₦244.3M in green). Shows proportion instantly.<br><br>
+        Option B: A donut chart where the full circle = gross income, the filled arc = expenses (43%), the remaining arc = net profit (57%). Matches your existing "Operating Margin 57%" badge.<br><br>
+        Place directly below the ₦428.5M / ₦184.2M numbers, before the Operating Margin badge.
+      </div>
+    </div>
+
+    <div class="task" id="t12">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t12')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Add data freshness timestamps to KPI cards</div>
+          <div class="task-desc">Show "Updated 2 mins ago" on each KPI card. Builds operational trust and signals when data may be stale.</div>
+          <div class="task-meta">
+            <span class="pill pill-ux">UX</span>
+            <span class="pill pill-code">Code</span>
+            <span class="effort">~1 hr</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t12d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t12d">
+        1. Add a small "Last updated: Xm ago" line at the very bottom of each KPI card in muted text (11px).<br>
+        2. If data is older than 1 hour: show in amber.<br>
+        3. If data is older than 24 hours: show in red with a refresh icon.<br>
+        4. Wire to your data refresh cycle. If data is real-time, show "Live" with a green dot instead.<br>
+        5. Add a refresh button (↻ icon) that manually triggers a data reload.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PHASE 3 -->
+<div class="phase">
+  <div class="phase-header" style="background:#FAECE7;border-color:#F5C4B3">
+    <div class="phase-num" style="background:#993C1D;color:#fff">3</div>
+    <div class="phase-info">
+      <div class="phase-title" style="color:#4A1B0C">Phase 3 — Mobile redesign</div>
+      <div class="phase-meta" style="color:#993C1D">Full mobile-first redesign. Treat this as a separate design project · Estimated: 1–2 weeks</div>
+    </div>
+    <span class="phase-badge" style="background:#F5C4B3;color:#4A1B0C">Separate sprint</span>
+  </div>
+  <div class="task-list">
+
+    <div class="task" id="t13">
+      <div class="task-main">
+        <div class="check done" onclick="toggle('t13')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title done-title">Design bottom navigation bar</div>
+          <div class="task-desc">Replace the sidebar with a 5-tab bottom nav: Dashboard · Properties · Documents · Transactions · More. 44px minimum height.</div>
+          <div class="task-meta">
+            <span class="pill pill-mobile">Mobile</span>
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~3 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t13d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t13d">
+        Tabs: Dashboard (home icon) · Properties (building icon) · Transactions (receipt icon) · People (users icon) · More (grid icon)<br><br>
+        Active tab: icon + label, brand navy fill, underline indicator.<br>
+        Inactive tabs: icon only, grey.<br>
+        Height: 56px total (safe area padding at bottom for iOS).<br>
+        "More" tab opens a slide-up sheet with: Documents, Commissions, Taxes, Financial Reports, Settings.<br>
+        Badge the Transactions tab with unread count when new live actions arrive.
+      </div>
+    </div>
+
+    <div class="task" id="t14">
+      <div class="task-main">
+        <div class="check done" onclick="toggle('t14')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title done-title">Redesign mobile dashboard card order and priority</div>
+          <div class="task-desc">Mobile shows the same information in the same order as desktop. Re-order for what a property manager checks first on their phone.</div>
+          <div class="task-meta">
+            <span class="pill pill-mobile">Mobile</span>
+            <span class="pill pill-ux">UX</span>
+            <span class="effort">~4 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t14d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t14d">
+        Recommended mobile card order (top to bottom):<br>
+        1. Greeting: "Good morning, [Name]" + date<br>
+        2. Alerts strip: urgent items (leases expiring, overdue rent) — dismissible<br>
+        3. 2-column KPI row: Revenue + Occupancy (most checked metrics)<br>
+        4. 2-column KPI row: Properties + Yield<br>
+        5. Live Actions feed (last 3 items, "View all" link)<br>
+        6. Lease Expiration mini-chart (condensed, 3-month view)<br>
+        7. "More analytics →" button that routes to a dedicated Analytics screen<br><br>
+        Financial Performance, Facilitator Performance, and Tenant Satisfaction move to an Analytics tab/screen, not the mobile dashboard.
+      </div>
+    </div>
+
+    <div class="task" id="t15">
+      <div class="task-main">
+        <div class="check done" onclick="toggle('t15')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title done-title">Audit and fix all touch target sizes</div>
+          <div class="task-desc">Every tappable element on mobile must be at least 44×44px. Currently many targets (sidebar links, chart toggles, tag filters) are far below this.</div>
+          <div class="task-meta">
+            <span class="pill pill-mobile">Mobile</span>
+            <span class="pill pill-ux">UX</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t15d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t15d">
+        1. Run a tap-target audit: overlay a 44×44px grid on your mobile frames and check every interactive element.<br>
+        2. Common failures to fix: time period toggles (1W/1M/3M), sidebar nav items, Quick Actions button, "View All" link, live action row tap areas.<br>
+        3. Increase padding rather than increasing visual element size — a button can look 28px tall but have 44px tap area via padding.<br>
+        4. Ensure 8px minimum spacing between adjacent tap targets to prevent mis-taps.
+      </div>
+    </div>
+
+    <div class="task" id="t16">
+      <div class="task-main">
+        <div class="check done" onclick="toggle('t16')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title done-title">Make charts responsive and touch-friendly on mobile</div>
+          <div class="task-desc">Desktop charts simply shrink on mobile and become unreadable. Charts need touch tooltips, simplified axes, and appropriate height for mobile viewports.</div>
+          <div class="task-meta">
+            <span class="pill pill-mobile">Mobile</span>
+            <span class="pill pill-code">Code</span>
+            <span class="effort">~4 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t16d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t16d">
+        1. Revenue line chart: on mobile, show 3M by default (not 5 years). Reduce X-axis labels to 4 points max. Enable tap-to-tooltip.<br>
+        2. Facilitator bar chart: on mobile, switch to a horizontal leaderboard list instead of grouped bars — much more readable.<br>
+        3. Lease Timeline: show 3 months on mobile with horizontal scroll for the rest. Make bars taller (min 32px) for tap accuracy.<br>
+        4. All charts: min-height 200px, max-height 280px on mobile.<br>
+        5. Use touch events (touchstart/touchend) for tooltip triggers, not hover.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PHASE 4 -->
+<div class="phase">
+  <div class="phase-header" style="background:#E6F1FB;border-color:#B5D4F4">
+    <div class="phase-num" style="background:#185FA5;color:#fff">4</div>
+    <div class="phase-info">
+      <div class="phase-title" style="color:#0C447C">Phase 4 — Design system & edge cases</div>
+      <div class="phase-meta" style="color:#185FA5">Establish foundations that prevent future inconsistency · Estimated: 1 week</div>
+    </div>
+    <span class="phase-badge" style="background:#B5D4F4;color:#0C447C">Prevents regression</span>
+  </div>
+  <div class="task-list">
+
+    <div class="task" id="t17">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t17')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Define and document a color token system</div>
+          <div class="task-desc">Create a named color system with semantic tokens — not raw hex values used ad hoc. This prevents the rainbow-color problem from recurring.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~3 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t17d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t17d">
+        Minimum token set to define:<br>
+        · --color-primary: your navy (used for: bars, active nav, primary buttons, chart series 1)<br>
+        · --color-secondary: your green (used for: positive trends, success states, chart series 2)<br>
+        · --color-danger: red (used for: over-budget, urgent lease, negative trend, error states)<br>
+        · --color-warning: amber (used for: below-target, approaching threshold, pending states)<br>
+        · --color-neutral: grey (used for: inactive bars, secondary chart series, disabled states)<br>
+        · --color-surface: card background · --color-border: card border<br><br>
+        Document: "A chart bar is always --color-primary unless a semantic condition overrides it." Write this rule down and share it with anyone who builds UI.
+      </div>
+    </div>
+
+    <div class="task" id="t18">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t18')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Define a typography scale with 4 levels</div>
+          <div class="task-desc">Currently text sizes are inconsistent between sections. Establish a fixed scale and apply it throughout.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t18d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t18d">
+        4-level type scale:<br>
+        · Hero: 32px, weight 500 — KPI headline numbers (₦342.1M, 8.4%)<br>
+        · Section title: 16px, weight 500 — "Financial Performance", "Recent Expenses"<br>
+        · Body / label: 13px, weight 400 — descriptions, chart labels, nav items<br>
+        · Metadata: 11px, weight 400, muted color — timestamps, subtitles, footnotes<br><br>
+        Rule: Never use all-caps below 12px. Never use 6 different sizes in one card. Apply scale as CSS variables or Figma text styles — whatever your tooling supports.
+      </div>
+    </div>
+
+    <div class="task" id="t19">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t19')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Design loading skeleton states for all cards</div>
+          <div class="task-desc">Every KPI card, chart, and the Transactions Hub needs a skeleton loader for when data is fetching. Without this, production looks broken on slow connections.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-code">Code</span>
+            <span class="effort">~3 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t19d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t19d">
+        1. Create grey shimmer blocks that mirror the shape of each card's content.<br>
+        2. KPI card skeleton: one large block (number area) + two small blocks (label + trend).<br>
+        3. Chart skeleton: a series of grey bars or a wavy grey line in the chart area + axis placeholder lines.<br>
+        4. Transactions Hub skeleton: 3 rows of [dot] [two lines of text] [tag].<br>
+        5. Animate with a shimmer sweep (CSS animation moving a gradient left-to-right).<br>
+        6. All skeletons should match the exact dimensions of the loaded card to prevent layout shift.
+      </div>
+    </div>
+
+    <div class="task" id="t20">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t20')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Design empty states for key sections</div>
+          <div class="task-desc">What does the dashboard look like for a new account with no data? Or when the Lease Timeline has no upcoming expirations? These states need designs.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t20d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t20d">
+        Priority empty states to design:<br>
+        · Lease Timeline: "No leases expiring in the next 7 months — add a property to get started" + CTA button.<br>
+        · Transactions Hub: "No recent transactions — your activity will appear here."<br>
+        · Live Actions: "All caught up — no new activity."<br>
+        · Facilitator Performance: "No facilitators assigned — invite your team."<br><br>
+        Each empty state: small illustration/icon + one-line message + optional CTA. Keep tone informative, not apologetic.
+      </div>
+    </div>
+
+    <div class="task" id="t21">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t21')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Design error states and retry patterns</div>
+          <div class="task-desc">When a data API fails, a card should show an error message with a retry button — not a blank card or a frozen loader.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-code">Code</span>
+            <span class="effort">~1.5 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t21d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t21d">
+        1. Error card: red border-left accent, warning icon, "Could not load [section name]" message, "Retry" button.<br>
+        2. Global error banner: if multiple sections fail simultaneously, show one top-of-page banner: "Some data could not be loaded. [Retry all]"<br>
+        3. Partial error: if only one chart fails, show the error inline without disrupting surrounding cards.<br>
+        4. Include last-known-good data with a warning: "Showing data from 3h ago — live data unavailable."
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PHASE 5 -->
+<div class="phase">
+  <div class="phase-header" style="background:#EAF3DE;border-color:#C0DD97">
+    <div class="phase-num" style="background:#3B6D11;color:#fff">5</div>
+    <div class="phase-info">
+      <div class="phase-title" style="color:#27500A">Phase 5 — Polish & accessibility</div>
+      <div class="phase-meta" style="color:#3B6D11">Final quality pass before production · Estimated: 3–5 days</div>
+    </div>
+    <span class="phase-badge" style="background:#C0DD97;color:#27500A">Before launch</span>
+  </div>
+  <div class="task-list">
+
+    <div class="task" id="t22">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t22')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Run WCAG AA contrast audit on all text</div>
+          <div class="task-desc">Check every text element against its background. Small labels and muted metadata text are likely failing the 4.5:1 minimum ratio.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t22d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t22d">
+        Tools: Figma Contrast plugin, or Chrome DevTools Accessibility panel, or https://webaim.org/resources/contrastchecker/<br><br>
+        Common failures to check:<br>
+        · "YTD Recognized", "Lease Efficiency", "Active Contracts" labels — likely too light<br>
+        · Chart axis labels (year labels 2020–2024) — likely failing at that size<br>
+        · "VOL: ₦3,428 AVG" — small text that may fail<br>
+        · Muted delta values (↑2.1%, ↑12.4%) — check the green against white background<br><br>
+        Fix by darkening text color, not by making backgrounds lighter.
+      </div>
+    </div>
+
+    <div class="task" id="t23">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t23')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">Upgrade sidebar active and hover states</div>
+          <div class="task-desc">Active item needs a left-border accent + pill background. Sub-items need visual indent. Collapsed mode should be possible for power users wanting more content space.</div>
+          <div class="task-meta">
+            <span class="pill pill-design">Design</span>
+            <span class="pill pill-ux">UX</span>
+            <span class="effort">~2 hrs</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t23d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t23d">
+        Active state: 2px left-border in brand navy + very light navy background pill (#E6F1FB equivalent).<br>
+        Hover state: light grey background with smooth 100ms transition.<br>
+        Sub-items (Landlords, Tenants, Buyers, Facilitators; Commissions, Taxes, Financial Reports): 12px left indent, 12px font size instead of 13px.<br>
+        Collapsed mode: clicking the hamburger (≡) collapses sidebar to icon-only (48px wide). Icons remain, labels hide. Tooltip on hover shows label.<br>
+        Add a subtle divider line between MAIN / PEOPLE / FINANCE sections (currently uses text labels only).
+      </div>
+    </div>
+
+    <div class="task" id="t24">
+      <div class="task-main">
+        <div class="check" onclick="toggle('t24')" aria-label="Mark task complete"></div>
+        <div class="task-body">
+          <div class="task-title">User test with 2–3 actual property managers</div>
+          <div class="task-desc">Before shipping, put the dashboard in front of real users. 30-minute sessions. Ask them to find specific information without guidance. Watch where they get stuck.</div>
+          <div class="task-meta">
+            <span class="pill pill-ux">UX</span>
+            <span class="effort">~1 week</span>
+          </div>
+        </div>
+        <button class="task-toggle" onclick="toggleDetail('t24d')" aria-label="Show task details"><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="task-detail" id="t24d">
+        Test tasks to give participants:<br>
+        1. "A lease is expiring soon — which property is it and when?" (tests Lease Timeline)<br>
+        2. "How is Emeka Okafor performing compared to the other facilitators this year?" (tests Facilitator chart)<br>
+        3. "Is the portfolio yield on track?" (tests KPI card + sparkline)<br>
+        4. "Where would you go to see all active leases?" (tests navigation)<br>
+        5. "A tenant complained about maintenance — what score does maintenance currently have?" (tests Satisfaction section)<br><br>
+        Record where users hesitate, click wrong, or ask "where is...?". These are your next design fixes.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const TOTAL = 24;
+function toggle(id){
+  const t=document.getElementById(id);
+  const chk=t.querySelector('.check');
+  const title=t.querySelector('.task-title');
+  const isDone=chk.classList.contains('done');
+  chk.classList.toggle('done',!isDone);
+  title.classList.toggle('done-title',!isDone);
+  updateProgress();
+}
+function toggleDetail(id){
+  const d=document.getElementById(id);
+  const isOpen=d.classList.contains('open');
+  d.classList.toggle('open',!isOpen);
+  const btn=d.previousElementSibling?.querySelector('.task-toggle') || d.parentElement.querySelector('.task-toggle');
+  if(btn){const icon=btn.querySelector('i');if(icon){icon.style.transform=isOpen?'':'rotate(180deg)';}}
+}
+function updateProgress(){
+  const done=document.querySelectorAll('.check.done').length;
+  const pct=Math.round((done/TOTAL)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'% complete';
+  document.getElementById('count-label').textContent=done+' of '+TOTAL+' done';
+}
+function resetAll(){
+  document.querySelectorAll('.check.done').forEach(c=>{
+    c.classList.remove('done');
+    const title=c.closest('.task').querySelector('.task-title');
+    if(title) title.classList.remove('done-title');
+  });
+  updateProgress();
+}
+</script>

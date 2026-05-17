@@ -1,0 +1,436 @@
+
+<h2 class="sr-only">Detailed design critique for Olakunle and Partners dashboard version 2</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);color:var(--color-text-primary);padding:0}
+.section{margin-bottom:2rem}
+.label{font-size:11px;color:var(--color-text-secondary);letter-spacing:.04em;margin-bottom:6px}
+.tag{display:inline-block;font-size:11px;font-weight:500;padding:2px 10px;border-radius:99px}
+.tag-red{background:#FCEBEB;color:#A32D2D}
+.tag-amber{background:#FAEEDA;color:#854F0B}
+.tag-blue{background:#E6F1FB;color:#185FA5}
+.tag-green{background:#EAF3DE;color:#3B6D11}
+.tag-purple{background:#EEEDFE;color:#3C3489}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:4px;border:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);color:var(--color-text-secondary)}
+
+.hero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;padding:20px;background:var(--color-background-secondary);border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);margin-bottom:2rem}
+.score-wrap{text-align:center}
+.score-big{font-size:52px;font-weight:500;line-height:1;color:var(--color-text-primary)}
+.score-sub{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
+.vs-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+.vs-pill{font-size:12px;padding:2px 10px;border-radius:99px}
+.improved{background:#EAF3DE;color:#3B6D11}
+.prev{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+
+.cat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem}
+.cat-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px}
+.cat-title{font-size:12px;font-weight:500;margin-bottom:10px;color:var(--color-text-primary)}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.bar-lbl{font-size:11px;color:var(--color-text-secondary);width:90px;flex-shrink:0}
+.bar-track{flex:1;height:6px;background:var(--color-background-secondary);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px}
+.bar-val{font-size:11px;font-weight:500;width:30px;text-align:right;flex-shrink:0}
+.delta{font-size:10px;color:#3B6D11;margin-left:2px}
+.delta-neg{color:#A32D2D}
+
+.issue-list{display:flex;flex-direction:column;gap:12px;margin-bottom:2rem}
+.issue{border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);background:var(--color-background-primary);overflow:hidden}
+.issue-head{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.issue-accent{width:3px;border-radius:0;align-self:stretch;flex-shrink:0;border-radius:99px}
+.issue-body{padding:12px 14px}
+.issue-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.7;margin-bottom:8px}
+.fix-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:12px;color:var(--color-text-primary);line-height:1.6;border-left:2px solid #639922}
+.fix-label{font-size:10px;font-weight:500;color:#3B6D11;letter-spacing:.05em;margin-bottom:4px}
+
+.new-badge{background:#FAEEDA;color:#854F0B;font-size:10px;font-weight:500;padding:1px 7px;border-radius:99px;margin-left:4px}
+.worse-badge{background:#FCEBEB;color:#A32D2D;font-size:10px;font-weight:500;padding:1px 7px;border-radius:99px;margin-left:4px}
+
+.viz-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:2rem}
+.viz-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);background:var(--color-background-primary);overflow:hidden}
+.viz-head{padding:10px 14px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;justify-content:space-between;align-items:center}
+.viz-current{font-size:12px;font-weight:500;color:var(--color-text-primary)}
+.viz-body{padding:12px 14px;font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+.viz-replace{font-size:11px;color:#185FA5;font-weight:500;margin-top:8px;display:flex;align-items:center;gap:4px}
+.arrow{font-size:14px}
+
+.layout-rec{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:16px;margin-bottom:2rem}
+.layout-grid{display:grid;grid-template-columns:1fr;gap:8px;margin-top:12px}
+.layout-row{display:flex;gap:8px}
+.layout-block{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px 12px;font-size:11px;color:var(--color-text-secondary);flex:1;background:var(--color-background-secondary);text-align:center;min-height:40px;display:flex;align-items:center;justify-content:center}
+.layout-block.accent{border-color:#378ADD;background:#E6F1FB;color:#185FA5}
+.layout-block.warn{border-color:#EF9F27;background:#FAEEDA;color:#854F0B}
+.layout-block.new{border-color:#639922;background:#EAF3DE;color:#3B6D11}
+.layout-block.tall{min-height:80px}
+.layout-block.xtall{min-height:60px}
+
+.pros-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:2rem}
+.pro{background:var(--color-background-secondary);border:0.5px solid #C0DD97;border-radius:var(--border-radius-lg);padding:12px}
+.pro-icon{font-size:18px;color:#639922;margin-bottom:6px}
+.pro-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.pro-desc{font-size:11px;color:var(--color-text-secondary);line-height:1.5}
+
+.verdict{background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:20px;text-align:center}
+.verdict-score{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px}
+.verdict-text{font-size:13px;color:var(--color-text-secondary);line-height:1.7;max-width:520px;margin:0 auto}
+
+.section-hd{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:14px;padding-bottom:8px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+</style>
+
+<div class="hero">
+  <div class="score-wrap">
+    <div class="score-big">79</div>
+    <div class="score-sub">out of 100</div>
+    <div class="vs-row">
+      <span class="vs-pill prev">v1: 75</span>
+      <span style="font-size:12px;color:var(--color-text-secondary)">→</span>
+      <span class="vs-pill improved">+4 pts</span>
+    </div>
+  </div>
+  <div>
+    <div class="label">Overall verdict</div>
+    <p style="font-size:14px;font-weight:500;margin-bottom:6px;color:var(--color-text-primary)">Incremental improvement — but two new critical problems introduced</p>
+    <p style="font-size:12px;color:var(--color-text-secondary);line-height:1.7">You fixed expenses values and lease labels — both good calls. But the color choices for the expense bars and the unexplained lease urgency colors are new problems that weren't in v1. The core layout, mobile UX, typography scale, and missing interactive states remain unresolved from the previous critique.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">
+      <span class="chip"><i class="ti ti-check" style="color:#639922;font-size:13px" aria-hidden="true"></i> Values added to expenses</span>
+      <span class="chip"><i class="ti ti-check" style="color:#639922;font-size:13px" aria-hidden="true"></i> Lease bar labels added</span>
+      <span class="chip"><i class="ti ti-check" style="color:#639922;font-size:13px" aria-hidden="true"></i> Financial Reports in sidebar</span>
+      <span class="chip"><i class="ti ti-check" style="color:#639922;font-size:13px" aria-hidden="true"></i> Role switcher added</span>
+      <span class="chip"><i class="ti ti-alert-triangle" style="color:#854F0B;font-size:13px" aria-hidden="true"></i> Random color explosion</span>
+      <span class="chip"><i class="ti ti-alert-triangle" style="color:#854F0B;font-size:13px" aria-hidden="true"></i> Mobile still broken</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-hd">Category scores</div>
+  <div class="cat-grid">
+    <div class="cat-card">
+      <div class="cat-title" style="color:#185FA5">Visual design</div>
+      <div class="bar-row"><span class="bar-lbl">Color system</span><div class="bar-track"><div class="bar-fill" style="width:48%;background:#378ADD"></div></div><span class="bar-val" style="color:#185FA5">48<span class="delta-neg">↓</span></span></div>
+      <div class="bar-row"><span class="bar-lbl">Hierarchy</span><div class="bar-track"><div class="bar-fill" style="width:78%;background:#378ADD"></div></div><span class="bar-val" style="color:#185FA5">78</span></div>
+      <div class="bar-row"><span class="bar-lbl">Typography</span><div class="bar-track"><div class="bar-fill" style="width:68%;background:#378ADD"></div></div><span class="bar-val" style="color:#185FA5">68<span class="delta">↑</span></span></div>
+      <div class="bar-row"><span class="bar-lbl">Spacing</span><div class="bar-track"><div class="bar-fill" style="width:74%;background:#378ADD"></div></div><span class="bar-val" style="color:#185FA5">74<span class="delta">↑</span></span></div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-title" style="color:#854F0B">UX &amp; usability</div>
+      <div class="bar-row"><span class="bar-lbl">Navigation</span><div class="bar-track"><div class="bar-fill" style="width:83%;background:#EF9F27"></div></div><span class="bar-val" style="color:#854F0B">83<span class="delta">↑</span></span></div>
+      <div class="bar-row"><span class="bar-lbl">Mobile UX</span><div class="bar-track"><div class="bar-fill" style="width:55%;background:#EF9F27"></div></div><span class="bar-val" style="color:#854F0B">55</span></div>
+      <div class="bar-row"><span class="bar-lbl">Interactivity</span><div class="bar-track"><div class="bar-fill" style="width:68%;background:#EF9F27"></div></div><span class="bar-val" style="color:#854F0B">68</span></div>
+      <div class="bar-row"><span class="bar-lbl">Data clarity</span><div class="bar-track"><div class="bar-fill" style="width:74%;background:#EF9F27"></div></div><span class="bar-val" style="color:#854F0B">74<span class="delta">↑</span></span></div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-title" style="color:#A32D2D">Accessibility</div>
+      <div class="bar-row"><span class="bar-lbl">Contrast</span><div class="bar-track"><div class="bar-fill" style="width:58%;background:#E24B4A"></div></div><span class="bar-val" style="color:#A32D2D">58</span></div>
+      <div class="bar-row"><span class="bar-lbl">Text sizing</span><div class="bar-track"><div class="bar-fill" style="width:64%;background:#E24B4A"></div></div><span class="bar-val" style="color:#A32D2D">64<span class="delta">↑</span></span></div>
+      <div class="bar-row"><span class="bar-lbl">Touch targets</span><div class="bar-track"><div class="bar-fill" style="width:50%;background:#E24B4A"></div></div><span class="bar-val" style="color:#A32D2D">50</span></div>
+      <div class="bar-row"><span class="bar-lbl">Semantic color</span><div class="bar-track"><div class="bar-fill" style="width:30%;background:#E24B4A"></div></div><span class="bar-val" style="color:#A32D2D">30<span class="delta-neg">↓</span></span></div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-title" style="color:#3B6D11">Data viz quality</div>
+      <div class="bar-row"><span class="bar-lbl">Chart choice</span><div class="bar-track"><div class="bar-fill" style="width:65%;background:#639922"></div></div><span class="bar-val" style="color:#3B6D11">65</span></div>
+      <div class="bar-row"><span class="bar-lbl">Labels &amp; values</span><div class="bar-track"><div class="bar-fill" style="width:76%;background:#639922"></div></div><span class="bar-val" style="color:#3B6D11">76<span class="delta">↑</span></span></div>
+      <div class="bar-row"><span class="bar-lbl">Color encoding</span><div class="bar-track"><div class="bar-fill" style="width:38%;background:#639922"></div></div><span class="bar-val" style="color:#3B6D11">38<span class="delta-neg">↓</span></span></div>
+      <div class="bar-row"><span class="bar-lbl">Benchmarks</span><div class="bar-track"><div class="bar-fill" style="width:40%;background:#639922"></div></div><span class="bar-val" style="color:#3B6D11">40</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-hd">What improved from v1 <span style="font-size:11px;color:var(--color-text-secondary);font-weight:400">3 genuine wins</span></div>
+  <div class="pros-grid">
+    <div class="pro">
+      <div class="pro-icon"><i class="ti ti-receipt" aria-hidden="true"></i></div>
+      <div class="pro-title">Expense values visible</div>
+      <div class="pro-desc">Each bar now shows ₦450k, ₦829k etc. Eliminates the "decorative bars with no meaning" problem from v1.</div>
+    </div>
+    <div class="pro">
+      <div class="pro-icon"><i class="ti ti-calendar-event" aria-hidden="true"></i></div>
+      <div class="pro-title">Lease bar labels</div>
+      <div class="pro-desc">Data labels (2, 5, 1, 8…) on top of lease bars make the chart actually readable. Good call.</div>
+    </div>
+    <div class="pro">
+      <div class="pro-icon"><i class="ti ti-user-circle" aria-hidden="true"></i></div>
+      <div class="pro-title">Role switcher added</div>
+      <div class="pro-desc">"View as: Property Manager" dropdown is an excellent feature — supports multi-role orgs and personalised views.</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-hd">Issues — full breakdown</div>
+  <div class="issue-list">
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#A32D2D"></div>
+        <span class="tag tag-red">Critical</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Recent Expenses: random rainbow colors encode nothing</span>
+        <span class="worse-badge">New problem in v2</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">Blue=Utilities, Orange=Repairs, Green=Legal, Purple=Marketing, Dark=Admin. None of these colors mean anything — they don't map to urgency, category type, budget status, or any real-world convention. A user's eye naturally tries to decode why Repairs is orange. It fails. Five unrelated colors in a single chart is visual noise, not information. v1's monochrome bars were actually better — at least they didn't mislead.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Use a single brand color (your navy) for all bars. Differentiation comes from the category labels, not color. Reserve color ONLY for semantic status — e.g. red if a category is over budget. Alternatively: group into 2 color categories (operational costs in navy, compliance/legal costs in a secondary tone) if there's a meaningful distinction to encode.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#A32D2D"></div>
+        <span class="tag tag-red">Critical</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Lease Timeline: urgency color system with no legend</span>
+        <span class="worse-badge">New problem in v2</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The bars shift from red (Jun) → orange (Jul–Sep) → green (Oct–Dec). This appears to encode urgency — red = expiring soon, green = plenty of time. That's actually a smart idea. But there is no legend, no axis label, no tooltip hint, nothing explaining this system. A user seeing red bars for June without context may panic unnecessarily, or miss the convention entirely. An unlabelled encoding is worse than no encoding.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Add a 3-item legend: <span style="color:#A32D2D">● Urgent (&lt;60 days)</span> · <span style="color:#854F0B">● Soon (60–90 days)</span> · <span style="color:#3B6D11">● Planned (90+ days)</span>. Add a section subtitle: "Color indicates urgency window." This turns a confusing chart into a genuinely powerful operational tool.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#A32D2D"></div>
+        <span class="tag tag-red">Critical</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Mobile layout still not designed — v2 unchanged</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The mobile version from v1 is unchanged. Still a vertical stack of desktop components with no bottom navigation, no tap-friendly targets, no information re-prioritisation, and charts that render too small to read. This is the biggest gap between this design and industry-standard PropTech tools.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix — minimum viable mobile redesign</div>
+          Bottom nav bar: Dashboard · Properties · Transactions · More (44px height). On the dashboard screen: show only Revenue + Occupancy at the top. Collapse Financial Performance into a single swipeable card with 3M view as default. Put Facilitator Performance and Tenant Satisfaction behind a "Performance" tab. Lease Timeline stays visible but in a horizontal scroll. Transactions Hub becomes the last card, full-width.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#854F0B"></div>
+        <span class="tag tag-amber">Moderate</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Financial Performance: two charts, one ambiguous time filter</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The 1W/1M/3M/6M/YD/ALL time toggle sits between the "Business Revenue Growth" chart and the "Income vs. Expense" panel. It's unclear which panel the toggle controls. Clicking "1W" would presumably change the revenue line — but does it also update gross income to ₦428.5M for just 1 week? The visual relationship is ambiguous and will cause confusion for real users.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Option A — Shared filter: Move the toggle above both panels with a connecting horizontal line or shared header that says "Period: 3M". This signals it controls everything below. Option B — Independent filters: Give each panel its own small toggle. Recommended: Option A, simpler and cleaner.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#854F0B"></div>
+        <span class="tag tag-amber">Moderate</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">KPI cards: no hover state, no drill-down, no interaction affordance</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">"Total Sales Revenue ₦342.1M" is the most important number on the page. Clicking it does nothing. In Buildium, AppFolio, and Re-Leased, every headline KPI is a navigation entry point. The icon in the top-right of each card suggests interactivity but clicking it is likely also inert. KPI cards without drill-down are missed opportunities — users want to know which 18 properties, which 87 occupied units, which contracts are active.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Add a hover state: light background shift + cursor:pointer + a small "View details →" link appearing at bottom of card. On click: navigate to the relevant section pre-filtered. For Revenue: go to Financial Reports filtered to YTD. For Occupied/Vacant: go to Properties filtered by lease status. For Properties Managed: go to Properties list. This is a zero-layout-cost, high-value interaction upgrade.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#854F0B"></div>
+        <span class="tag tag-amber">Moderate</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Tenant Satisfaction radar still has no axis scale or scores</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The pentagon shape still carries no numerical meaning. A user can see "Cleanliness is better than Amenities" from the shape, but cannot tell if Maintenance is rated 3/10 or 7/10. There's no previous-period comparison, no overall score, and no actionable threshold (e.g. "below 6 requires escalation"). This is a chart that looks good but communicates nothing specific.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix — consider replacing this chart entirely</div>
+          Replace with a 5-row horizontal bar chart (one per dimension) showing a score out of 10, a target line at 7.5, and a trend arrow (↑↓→). This gives: exact scores, benchmark comparison, trend direction, and is far more readable. The radar chart is visually distinctive but data-poor. Keep the radar ONLY if you add axis numbers (1/5/10 rings) and a previous-quarter overlay.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#854F0B"></div>
+        <span class="tag tag-amber">Moderate</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Business Revenue Growth chart: no Y-axis values or data callouts</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The line chart shows revenue trend from 2020 to 2024 with a nice curve, but the Y-axis has no values. "VOL: ₦3,428 AVG" is the only number — an average over 5 years shown as a single figure. A user cannot tell if 2024 is ₦200M, ₦500M, or ₦1B from the chart. The dip in 2022 could be catastrophic or trivial without scale. This makes the chart aesthetically appealing but analytically useless.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Add Y-axis gridlines with naira labels (₦100M, ₦200M, ₦300M etc). Add a tooltip on hover showing the exact monthly/quarterly value. Add a callout bubble at the most recent point showing the current value. Consider annotating the 2022 dip with a label (e.g. "Market correction") — context transforms a confusing valley into a story.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#854F0B"></div>
+        <span class="tag tag-amber">Moderate</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Facilitator Performance: bar chart missing totals and ranking</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The grouped bar chart shows 3 facilitators across 4 quarters. It answers "who was best in Q3?" but not "who is the best facilitator overall this year?" — the most important managerial question. There's also no target line ("each facilitator should close 12 deals/quarter"), no YTD total per person, and Q4 appears to show future projections mixed with actuals without any distinction.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Add a "YTD Total" label below each facilitator name in the legend (e.g. "Sola Adebayo — 42 deals"). Add a horizontal target line across all quarters. Separate actual from projected bars using solid vs. hatched fill. Consider adding a small leaderboard table to the right of the chart showing rank, name, total deals, and % to target.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#378ADD"></div>
+        <span class="tag tag-blue">Minor</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Portfolio Yield "Target 9.0%" has no visual target indicator</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The yield card shows 8.4% and says "Target 9.0%" but the sparkline chart doesn't show where 9.0% sits. A user has to mentally calculate "I'm 0.6% below target" — basic math, but unnecessary cognitive load. The "-0.2%" trend indicator also suggests it's moving away from target, which should be alarming, but there's no visual urgency.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Add a horizontal dashed line on the sparkline at 9.0% with label "Target". Color the 8.4% in amber (warning) since it's below target and declining. The -0.2% delta should be red, not neutral grey. This turns a static number into a clear status signal without any layout change.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#378ADD"></div>
+        <span class="tag tag-blue">Minor</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">Live Actions in Transactions Hub: tags lack visual hierarchy</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">The "LEASE", "FINANCE", "DOC" tags on the right of each live action are dark navy pills that all look the same urgency. There's no way to tell if a commission payout notification is more urgent than a document upload. The timestamp format ("2HRS AGO", "10 AGO") also has inconsistent formatting (missing "D" for day on the 1D entry).</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Color-code tags by type: LEASE=blue, FINANCE=green, DOC=grey. Add an urgency dot (red/amber/green) to the left of each row for action-required vs. informational. Fix timestamp consistency: use "2h ago", "1d ago", "20m ago" — lowercase, abbreviated, consistent suffix pattern.
+        </div>
+      </div>
+    </div>
+
+    <div class="issue">
+      <div class="issue-head">
+        <div class="issue-accent" style="background:#378ADD"></div>
+        <span class="tag tag-blue">Minor</span>
+        <span style="font-size:13px;font-weight:500;color:var(--color-text-primary)">No empty states, skeleton loaders, or error handling designed</span>
+      </div>
+      <div class="issue-body">
+        <p class="issue-desc">Carried over from v1 and still unresolved. Every card assumes perfect data. In production, financial data loads asynchronously, APIs fail, and some metrics may be zero. Without designed states for these conditions, the actual shipped product will show broken layouts or blank cards.</p>
+        <div class="fix-box">
+          <div class="fix-label">Fix</div>
+          Design 3 states for every card: Loading (grey skeleton shimmer), Empty ("No data for this period — add a transaction"), Error ("Could not load — retry"). At minimum, design these for the 4 KPI cards and the Transactions Hub. This doubles your design deliverables but is non-negotiable for a production product.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-hd">Data visualisation replacements</div>
+  <div class="viz-grid">
+
+    <div class="viz-card">
+      <div class="viz-head">
+        <span class="viz-current">Current: Radar chart (Tenant Satisfaction)</span>
+        <span class="tag tag-red">Replace</span>
+      </div>
+      <div class="viz-body">
+        Radars look great but are hard to read precisely and fail completely when you have fewer than 5 dimensions or any dimension is near zero.
+        <div class="viz-replace"><i class="ti ti-arrow-right" aria-hidden="true"></i> Replace with: Horizontal score bars (5 rows, score/10, target line, trend arrow). Far more readable and actionable for a management audience.</div>
+      </div>
+    </div>
+
+    <div class="viz-card">
+      <div class="viz-head">
+        <span class="viz-current">Current: Line chart (Revenue Growth)</span>
+        <span class="tag tag-amber">Improve</span>
+      </div>
+      <div class="viz-body">
+        Line chart is the right choice for trend data. But it needs Y-axis labels, gridlines, a hover tooltip, and a callout on the most recent data point to be informative.
+        <div class="viz-replace"><i class="ti ti-arrow-right" aria-hidden="true"></i> Keep but add: Y-axis scale, period annotations, interactive tooltip, current-value callout bubble.</div>
+      </div>
+    </div>
+
+    <div class="viz-card">
+      <div class="viz-head">
+        <span class="viz-current">Current: Horizontal bars (Recent Expenses)</span>
+        <span class="tag tag-amber">Improve</span>
+      </div>
+      <div class="viz-body">
+        Bar chart is correct for comparing expense categories. Values added in v2 are good. Problem is the random colors. Also missing: % of total budget, MoM change, and a total line.
+        <div class="viz-replace"><i class="ti ti-arrow-right" aria-hidden="true"></i> Keep, fix colors to single-hue navy. Add "% of total" labels. Add a budget line. Consider a waterfall if you want to show the flow from gross income to net.</div>
+      </div>
+    </div>
+
+    <div class="viz-card">
+      <div class="viz-head">
+        <span class="viz-current">Current: Grouped bars (Facilitator Performance)</span>
+        <span class="tag tag-amber">Improve</span>
+      </div>
+      <div class="viz-body">
+        Grouped bars work for comparing people across time, but they get crowded with 3 people × 4 quarters. Reading individual performance trends is difficult.
+        <div class="viz-replace"><i class="ti ti-arrow-right" aria-hidden="true"></i> Consider: Small multiples (one chart per facilitator, same scale) or a stacked bar with YTD total labels. Add a target line per quarter. Or replace with a leaderboard table + individual sparklines.</div>
+      </div>
+    </div>
+
+    <div class="viz-card">
+      <div class="viz-head">
+        <span class="viz-current">Current: Bar chart (Lease Expiration)</span>
+        <span class="tag tag-green">Keep with fix</span>
+      </div>
+      <div class="viz-body">
+        Urgency color coding is genuinely clever and adds real operational value. Just needs the legend. Good instinct — keep it.
+        <div class="viz-replace"><i class="ti ti-arrow-right" aria-hidden="true"></i> Add a legend (Urgent / Soon / Planned), add a subtitle explaining the color system, and optionally add a "View expiring leases" CTA that filters the Properties list.</div>
+      </div>
+    </div>
+
+    <div class="viz-card">
+      <div class="viz-head">
+        <span class="viz-current">Missing: Income vs. Expense breakdown</span>
+        <span class="tag tag-purple">Recommend adding</span>
+      </div>
+      <div class="viz-body">
+        You have Gross Income ₦428.5M and Total Expenses ₦184.2M shown as numbers, but no visual that shows the relationship — where the ₦244.3M net profit sits proportionally.
+        <div class="viz-replace"><i class="ti ti-arrow-right" aria-hidden="true"></i> Add: A simple stacked bar or waterfall chart showing Income → Expenses → Net alongside the number. A donut showing expenses as % of income is also powerful here.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-hd">Recommended layout restructure</div>
+  <div class="layout-rec">
+    <p style="font-size:12px;color:var(--color-text-secondary);margin-bottom:14px">Current layout stacks everything vertically in an undifferentiated grid. Recommend regrouping into logical zones with visual separation between executive summary, operational, and people layers.</p>
+    <div class="layout-grid">
+      <div class="layout-row">
+        <div class="layout-block accent" style="flex:4">Zone 1 — Executive summary: 4 KPI cards (clickable)</div>
+      </div>
+      <div class="layout-row">
+        <div class="layout-block accent tall" style="flex:3">Zone 2L — Financial Performance (line chart + P&L) with unified time filter above</div>
+        <div class="layout-block accent tall" style="flex:2">Zone 2R — Expenses waterfall + Budget status</div>
+      </div>
+      <div class="layout-row">
+        <div class="layout-block new xtall" style="flex:2">Zone 3L — Facilitator leaderboard + sparklines</div>
+        <div class="layout-block new xtall" style="flex:2">Zone 3R — Tenant Satisfaction score bars (replace radar)</div>
+      </div>
+      <div class="layout-row">
+        <div class="layout-block warn" style="flex:4">Zone 4 — Lease Expiration Timeline (full width, urgency colors + legend)</div>
+      </div>
+      <div class="layout-row">
+        <div class="layout-block" style="flex:4;background:#2C2C2A;color:#D3D1C7;border-color:#444441">Zone 5 — Transactions Hub (dark, full width — keep as-is)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="verdict">
+  <div class="verdict-score">v2 score: 79/100 — up from 75. Direction is right, pace needs to accelerate.</div>
+  <p class="verdict-text">You're fixing the right things and your instincts (urgency colors on leases, expense values, role switcher) are genuinely good. The core problems are now fewer in number but deeper in complexity: the color system needs a proper design philosophy, the mobile needs a full redesign, and the charts need to stop being decorative and start being operationally useful. Fix those three and you're at 90+.</p>
+</div>
