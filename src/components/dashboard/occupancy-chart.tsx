@@ -1,17 +1,11 @@
 'use client';
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Key, TrendingUp, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
 export function OccupancyChart() {
   const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const data = [
-    { name: 'Occupied', value: 87, fill: '#0f172a' },
-    { name: 'Vacant', value: 13, fill: '#f3f0f2' } 
-  ];
 
   const handleRefresh = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,46 +26,21 @@ export function OccupancyChart() {
           </div>
         </div>
 
-        <div className="relative z-10 flex-grow w-full h-[80px] min-h-[80px] mt-2 mb-2 flex items-center justify-center">
-          <div className="relative w-full h-full flex items-center gap-4">
-             <div className="w-[80px] h-[80px] flex-shrink-0 relative">
-               <ResponsiveContainer width="100%" height="100%">
-                 <PieChart>
-                   <Pie
-                     data={data}
-                     cx="50%"
-                     cy="50%"
-                     innerRadius={28}
-                     outerRadius={40}
-                     stroke="none"
-                     dataKey="value"
-                   >
-                     {data.map((entry, index) => (
-                       <Cell key={`cell-${index}`} fill={entry.fill} />
-                     ))}
-                   </Pie>
-                   <Tooltip 
-                     contentStyle={{ backgroundColor: '#141f30', border: 'none', borderRadius: '4px', fontSize: '10px', color: '#fff', padding: '4px' }}
-                     itemStyle={{ color: '#fff' }}
-                   />
-                 </PieChart>
-               </ResponsiveContainer>
-               <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                 <span className="font-mono font-bold text-sm text-deep-slate">87%</span>
-               </div>
+        <div className="relative z-10 flex-grow w-full h-[80px] min-h-[80px] mt-2 mb-2 flex flex-col justify-center gap-3">
+           <div className="flex justify-between items-end">
+             <div>
+               <div className="font-mono font-bold text-fluid-2xl text-deep-slate leading-none">87%</div>
+               <div className="font-mono text-[10px] text-muted-steel font-medium mt-1">Occupied</div>
              </div>
-             
-             <div className="flex flex-col gap-1.5 justify-center">
-               <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-sm bg-deep-slate"></div>
-                 <span className="font-mono text-[10px] text-deep-slate font-bold">87 Units Occ.</span>
-               </div>
-               <div className="flex items-center gap-2">
-                 <div className="w-2 h-2 rounded-sm bg-whisper-border"></div>
-                 <span className="font-mono text-[10px] text-muted-steel font-medium">13 Units Vac.</span>
-               </div>
+             <div className="text-right">
+               <div className="font-mono font-bold text-lg text-slate-400 leading-none">13%</div>
+               <div className="font-mono text-[10px] text-muted-steel font-medium mt-1">Vacant</div>
              </div>
-          </div>
+           </div>
+           
+           <div className="w-full h-3 rounded-full bg-slate-100 flex overflow-hidden">
+             <div className="h-full bg-deep-slate" style={{ width: '87%' }}></div>
+           </div>
         </div>
 
         <div className="flex items-center justify-between mt-fluid-xs pt-fluid-3xs border-t border-whisper-border/50 relative z-10">
